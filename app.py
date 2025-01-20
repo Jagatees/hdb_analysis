@@ -1,7 +1,8 @@
 import streamlit as st
+from data_exploration import data_exploration
 
 # Page Title
-st.title("HDB Resale Price Prediction")
+st.title("HDB Resale Price Prediction with Map Visualization")
 
 # Sidebar for Navigation
 st.sidebar.header("Navigation")
@@ -12,15 +13,13 @@ if options == "Home":
     st.write("Use this tool to explore HDB resale data and predict prices based on key attributes.")
 
 if options == "Data Exploration":
-    st.write("Upload your resale dataset here:")
-    uploaded_file = st.file_uploader("Choose a file", type=["csv"])
-    if uploaded_file:
-        st.write("File uploaded successfully! Data will be displayed here.")
-    else:
-        st.info("No file uploaded yet.")
+    st.subheader("Data Exploration")
+    uploaded_file = st.file_uploader("Upload your dataset (CSV format)", type=["csv"])
+
+    data_exploration(uploaded_file)
 
 if options == "Price Prediction":
-    st.write("Enter the details below:")
+    st.subheader("Price Prediction")
     flat_type = st.selectbox("Flat Type", ["3-room", "4-room", "5-room", "Executive"])
     floor_area = st.number_input("Floor Area (sqm)", min_value=20, max_value=200, step=1)
     lease_remaining = st.slider("Remaining Lease (years)", min_value=1, max_value=99, step=1)
@@ -29,4 +28,3 @@ if options == "Price Prediction":
     # Placeholder for prediction
     if st.button("Predict Price"):
         st.success(f"Predicted Price: ${'500,000'} (Placeholder)")
-
