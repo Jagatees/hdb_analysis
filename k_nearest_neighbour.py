@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 import re
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-
+import numpy as np
 
 def lease_to_months(lease_str):
     match = re.search(r'(\d+)\s+years(?:\s+(\d+)\s+months)?', lease_str)
@@ -15,6 +15,14 @@ def lease_to_months(lease_str):
         months = int(match.group(2)) if match.group(2) else 0
         return years * 12 + months
     return None
+
+def storey_to_midpoint(storey_str):
+    numbers = re.findall(r'\d+', storey_str)  # Extract numbers
+    if len(numbers) == 2:
+        return (int(numbers[0]) + int(numbers[1])) / 2  # Calculate midpoint
+    return None  # Handle missing values
+
+choice = input("Apply IQR? (Type 'yes' else no) \n")
 
 # Load dataset
 df = pd.read_csv("csv/dataset_for_model.csv")
@@ -30,11 +38,36 @@ for col in columns:
     unique_vals = df[col].unique()
     # print(f"Unique values in {col} ({len(unique_vals)}):")
     # print(unique_vals)
-    # print()  # Adds an empty line for better readability
+    # print()  # Adds an empty line for better readabilityn
+
+if choice == 'yes':
+    print(f"Dataset size before IQR filtering: {len(df)} rows")
+    # Compute IQR
+    Q1 = df["resale_price"].quantile(0.25)
+    Q3 = df["resale_price"].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # Define upper and lower bound
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    # Identify outliers
+    # outliers = df[(df["resale_price"] < lower_bound) | (df["resale_price"] > upper_bound)]
+    # print(f"Outliers detected: {len(outliers)}")
+    # print(outliers[["town", "flat_type", "storey_range", "floor_area_sqm", "flat_model", "remaining_lease", "Score", "resale_price"]])
+
+    # Filter out outliers
+    df = df[(df["resale_price"] >= lower_bound) & (df["resale_price"] <= upper_bound)]
+    print(f"Dataset size after IQR filtering: {len(df)} rows")
 
 
 # Change the labels in remaining_lease to continuous numbers
 df['remaining_lease'] = df['remaining_lease'].apply(lease_to_months)
+
+# Change the lables in storey_range to find the midpoint instead to reduce one hot vector columns (not ideal for knn)
+df["storey_midpoint"] = df["storey_range"].apply(storey_to_midpoint)
+# Drop the original categorical column
+df.drop("storey_range", axis=1, inplace=True)
 
 # Define X and Y
 X_temp = df.drop(['resale_price', 'month'], axis=1)
@@ -48,6 +81,7 @@ X_num = X_temp[num_cols]
 X = pd.concat([X_num, X_cat], axis=1)
 
 # Split dataset
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Normalisation
@@ -73,9 +107,10 @@ model.fit(X_train_scaled, y_train)
 y_pred = model.predict(X_test_scaled)
 mse = mean_squared_error(y_test, y_pred)
 mae = mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(mse)
 r2 = r2_score(y_test, y_pred)
 print(f"Default Model:")
-print(f"Mean Absolute Error: {mae:.2f}, R² Score: {r2:.2f}, MSE Error : {mse:.2f} \n")
+print(f"Mean Absolute Error: {mae:.2f}, R² Score: {r2:.2f}, MSE Error : {mse:.2f},  RMSE Error : {rmse:.2f} \n")
 
 
 # Test new data prediction if needed
@@ -91,9 +126,10 @@ new_data = pd.DataFrame({
     'resale_price': [280000],
     'Score': [53],
 })
-
-# Change the remaining_lease to continuous value like the method 1
+# Change the columns like the model
 new_data['remaining_lease'] = new_data['remaining_lease'].apply(lease_to_months)
+new_data["storey_midpoint"] = new_data["storey_range"].apply(storey_to_midpoint)
+new_data.drop("storey_range", axis=1, inplace=True)
 
 X_newTemp = new_data.drop(['resale_price', 'month'], axis=1)
 y_new = df['resale_price']
@@ -151,6 +187,7 @@ y_pred_tuned = best_knn.predict(X_test_scaled)
 mse_tuned = mean_squared_error(y_test, y_pred_tuned)
 mae_tuned = mean_absolute_error(y_test, y_pred_tuned)
 r2_tuned = r2_score(y_test, y_pred_tuned)
+rmse_tuned = np.sqrt(mse_tuned)
 
 print(f"Tuned Model:")
-print(f"Mean Absolute Error: {mae_tuned:.2f}, R² Score: {r2_tuned:.2f}, MSE Error : {mse_tuned:.2f} \n")
+print(f"Mean Absolute Error: {mae_tuned:.2f}, R² Score: {r2_tuned:.2f}, MSE Error : {mse_tuned:.2f}, RMSE Error : {rmse_tuned:.2f} \n")
