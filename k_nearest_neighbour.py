@@ -7,6 +7,8 @@ import re
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def lease_to_months(lease_str):
     match = re.search(r'(\d+)\s+years(?:\s+(\d+)\s+months)?', lease_str)
@@ -191,3 +193,22 @@ rmse_tuned = np.sqrt(mse_tuned)
 
 print(f"Tuned Model:")
 print(f"Mean Absolute Error: {mae_tuned:.2f}, R² Score: {r2_tuned:.2f}, MSE Error : {mse_tuned:.2f}, RMSE Error : {rmse_tuned:.2f} \n")
+
+# Visuals
+plt.figure(figsize=(8, 6))
+# Base model predictions (blue)
+sns.scatterplot(x=y_test, y=y_pred, label="Base Model Predictions", alpha=0.6, color='blue')
+# Tuned model predictions (red)
+sns.scatterplot(x=y_test, y=y_pred_tuned, label="Tuned Model Predictions", alpha=0.6, color='orange')
+# Actual values (green) - These are just perfect points on the diagonal
+sns.scatterplot(x=y_test, y=y_test, label="Actual Values", color='green', marker='o', alpha=0.7)
+# Perfect Fit Line
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', label="Perfect Fit Line")
+# Labels and title
+plt.xlabel("Actual Resale Price")
+plt.ylabel("Predicted Resale Price")
+plt.title("Predicted vs. Actual: Base vs. Tuned Model (with Actual Values)")
+plt.legend()
+plt.show()
+
+
