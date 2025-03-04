@@ -92,7 +92,7 @@ print(top_10_importance)
 
 # Save Best Model and Scaler for Streamlit Integration
 joblib.dump(best_model, "decision_tree_model.pkl")
-joblib.dump(scaler, "../scaler.pkl")
+joblib.dump(scaler, "scaler.pkl")
 
 print("Decision Tree model and scaler saved successfully!")
 
