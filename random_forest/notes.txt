@@ -1,35 +1,22 @@
 
 Random Forest Default Parameters: MSE=3733585957.81, RMSE=61103.08, MAE=43206.62, R²=0.8827
-Random Forest Tuned Parameters: MSE=4418267807.03, RMSE=66470.05, MAE=48526.97, R²=0.8612
-
+Random Forest Tuned Parameters: MSE=4455529082.48, RMSE=66749.75, MAE=48039.25, R²=0.8600
 Base Model Better
 
 
-Reasoned for 15 seconds
-From a visual standpoint, the base model (shown in these new plots) appears to be performing at least as well—and in many cases better—than the fine-tuned model. Here are the key observations when comparing both sets of plots:
+Reasoned for a few seconds
+Here is a concise summary of why the base Random Forest model outperformed the fine-tuned version in your particular scenario:
 
-Actual vs. Predicted:
+Overfitting from Tuning
+When you expanded or adjusted the hyperparameters, the model may have become too specialized to the training set, reducing its ability to generalize to unseen data. In contrast, the base model, with simpler or more conservative settings, did not overfit as much.
 
-In both models, predictions generally follow the diagonal, but the base model’s points appear slightly more tightly clustered around the line, particularly at higher values. This often indicates smaller errors.
-Feature Importances:
+Parameter Search Space
+The default hyperparameters for a Random Forest are often quite robust for many datasets. If the parameter grid you used for tuning didn’t include values close to those defaults—or if it ventured into overly complex or restrictive settings—the model could end up performing worse.
 
-The same top features (like floor_area_sqm, Score, and remaining_lease) are dominant in both models, which is typical of Random Forest for this dataset.
-The overall distribution of feature importances looks similar, suggesting the fine-tuning did not dramatically alter which features the model depends on.
-Residuals Plot:
+Complexity vs. Data Characteristics
+The data may not have needed a more complex model. Sometimes, fine-tuning introduces complexity that doesn’t align well with the dataset’s underlying patterns, whereas the defaults are well-balanced between bias and variance.
 
-Both models exhibit a funnel shape in the residuals, meaning error magnitudes grow with higher predicted prices. However, the base model’s residuals seem slightly more centered and less spread out at the high end, suggesting fewer extremely large positive or negative errors.
-Numerical Metrics (from your earlier logs):
+Cross-Validation and Random Variations
+Random seeds, the specific cross-validation splits, or small differences in how the data is partitioned can all influence results. The default model might simply have matched your dataset’s characteristics better during training and validation.
 
-The base model had lower MSE/RMSE and higher R² than the fine-tuned model in your previous runs. This indicates the base model did, in fact, generalize better to the test set than the “fine-tuned” version.
-Why Might the Base Model Outperform the “Tuned” Model?
-Overfitting: The chosen parameter grid might have led to configurations that overfit the training data, resulting in worse test performance.
-Parameter Ranges: The parameter search space may not have been centered around truly optimal values for this particular dataset.
-Random Variation: Sometimes, default settings are already near-optimal for certain data distributions.
-Next Steps
-Refine or Expand the Hyperparameter Search: Consider narrowing or shifting the ranges around parameters that are most likely to influence model performance (e.g., max_depth, n_estimators).
-Use Different Evaluation Metrics: If your data or business goals prioritize certain error characteristics (like penalizing large errors more), you may want to optimize for metrics like Mean Absolute Percentage Error (MAPE) or try a log transform on the target.
-Feature Engineering: Incorporate additional relevant features or create interaction features. Sometimes, better features outweigh further parameter tuning.
-Try Other Models: Compare performance with boosting methods (XGBoost, LightGBM) or a VotingRegressor that combines different regressors.
-
-
-
+Overall, these factors can lead a fine-tuned model to underperform relative to a simpler base model, especially if the default parameters are already near-optimal for the data at hand.

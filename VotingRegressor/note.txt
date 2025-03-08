@@ -1,0 +1,11 @@
+Voting Regressor MSE: 5541598990.33
+Voting Regressor RMSE: 74441.92
+Voting Regressor MAE: 58864.64
+Voting Regressor R²: 0.8259
+
+
+Voting Regressor Performance with Tuned Components:
+MSE:  4532236523.26
+RMSE: 67321.89
+MAE:  52599.87
+R²:   0.8576
