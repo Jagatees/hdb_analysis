@@ -10,15 +10,15 @@ import joblib
 import time
 
 # Load dataset
-df = pd.read_csv("../csv/flats_with_scores.csv")
+df = pd.read_csv("../csv/sampled_hdb_data.csv")
 
 # Define X and Y using the correct columns
-X_temp = df[['town', 'flat_type', 'block', 'street_name', 'storey_range', 'floor_area_sqm', 'flat_model', 'lease_commence_date', 'remaining_lease', 'Score']]
+X_temp = df[['town', 'flat_type', 'storey_range', 'floor_area_sqm', 'flat_model', 'remaining_lease', 'Score', 'region', 'storey_range_numeric']]
 y = df['resale_price']
 
 # Handling categorical and numerical columns
-cat_cols = ['town', 'flat_type', 'block', 'street_name', 'storey_range', 'flat_model', 'lease_commence_date', 'remaining_lease']  # Assuming these are categorical
-num_cols = ['floor_area_sqm', 'Score']  # Assuming these are numerical
+cat_cols = ['town', 'flat_type', 'storey_range', 'flat_model', 'region']  # Updated categorical columns
+num_cols = ['floor_area_sqm', 'remaining_lease', 'Score', 'storey_range_numeric']  # Updated numerical columns
 
 X_cat = pd.get_dummies(X_temp[cat_cols], drop_first=True)
 X_num = X_temp[num_cols]
@@ -51,49 +51,4 @@ r2_rf = r2_score(y_test, y_pred_rf)
 print(f"Random Forest Default Parameters: MSE={mse_rf:.2f}, RMSE={rmse_rf:.2f}, MAE={mae_rf:.2f}, R²={r2_rf:.4f}")
 print(f"Model training completed in {elapsed_time:.2f} seconds.")
 
-# Hyperparameter tuning via GridSearchCV
-param_grid = {
-    'n_estimators': [100, 200, 300],
-    'max_depth': [10, 20, 30],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
-    'max_features': ['auto', 'sqrt', 'log2']
-}
-grid_search = GridSearchCV(estimator=RandomForestRegressor(random_state=42, n_jobs=-1), param_grid=param_grid, cv=5, scoring='neg_mean_squared_error', verbose=2)
-grid_search.fit(X_train_scaled, y_train)
-
-# Best model and evaluation
-best_model = grid_search.best_estimator_
-y_pred_tuned = best_model.predict(X_test_scaled)
-mse_tuned = mean_squared_error(y_test, y_pred_tuned)
-rmse_tuned = math.sqrt(mse_tuned)
-mae_tuned = mean_absolute_error(y_test, y_pred_tuned)
-r2_tuned = r2_score(y_test, y_pred_tuned)
-
-print(f"Random Forest Tuned Parameters: MSE={mse_tuned:.2f}, RMSE={rmse_tuned:.2f}, MAE={mae_tuned:.2f}, R²={r2_tuned:.4f}")
-
-# Save the tuned model
-joblib.dump(best_model, 'random_forest_tuned_model.pkl')
-print("Tuned model saved as 'random_forest_tuned_model.pkl'")
-
-# Visualization of results
-metrics = ['MSE', 'RMSE', 'MAE', 'R²']
-default_values = [mse_rf, rmse_rf, mae_rf, r2_rf]
-tuned_values = [mse_tuned, rmse_tuned, mae_tuned, r2_tuned]
-
-x = np.arange(len(metrics))  # the label locations
-width = 0.35  # the width of the bars
-
-fig, ax = plt.subplots()
-rects1 = ax.bar(x - width/2, default_values, width, label='Default')
-rects2 = ax.bar(x + width/2, tuned_values, width, label='Tuned')
-
-# Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_ylabel('Scores')
-ax.set_title('Scores by model and metric')
-ax.set_xticks(x)
-ax.set_xticklabels(metrics)
-ax.legend()
-
-fig.tight_layout()
-plt.show()
+# Proceed with your GridSearch and other operations as previously

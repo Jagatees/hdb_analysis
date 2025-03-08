@@ -1,0 +1,20 @@
+RandomForestRegressor: This is used for regression problems, where the goal is to predict a continuous output variable. The RandomForestRegressor fits a number of classifying decision trees on various sub-samples of the dataset and uses averaging to improve the predictive accuracy and control over-fitting.
+
+
+Limiation : numpy._core._exceptions._ArrayMemoryError: Unable to allocate 10.2 GiB for an array with shape (105198, 12981) and data type float64
+
+
+Random Forest Default Parameters: MSE=3733585957.81, RMSE=61103.08, MAE=43206.62, R²=0.8827
+Model training completed in 0.87 seconds.
+
+Random Forest Tuned Parameters: MSE=4418267807.03, RMSE=66470.05, MAE=48526.97, R²=0.8612
+Tuned model saved as 'random_forest_tuned_model.pkl'
+
+Ans : Base better then Fine tune model whY?
+
+Why the Base Model Did Better:
+Overfitting in Tuning: The tuned model might be overfitting the training data. This can occur when the hyperparameters are set in such a way that the model becomes too complex. This complexity allows the model to perform exceptionally well on training data but poorly on unseen data (test data), as it fails to generalize well.
+
+Parameter Selection and Range: The choice and range of hyperparameters in the grid search might not be ideal. If the hyperparameter space is too wide or not appropriately centered around optimal values, the grid search might miss the best configurations. Additionally, certain hyperparameters may interact in unforeseen ways that degrade performance.
+
+Model Complexity: The default settings for a RandomForest are often quite robust. RandomForest is designed to handle a high degree of variance in the data by default. By adjusting parameters like max_depth, min_samples_split, and min_samples_leaf, you might inadvertently be reducing the model's ability to capture variance, thereby simplifying it too much or making it overly complex.
