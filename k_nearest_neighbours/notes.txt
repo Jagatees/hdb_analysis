@@ -1,0 +1,10 @@
+Columns used: ['year', 'flat_type', 'floor_area_sqm', 'remaining_lease', 'Score', 'storey_range_numeric', 'region']
+- Didnt use remaining_lease with remaining_lease due to high correlation
+- Column month made it worse by a bit
+
+Default Model:
+MSE: 2708987891.01, RMSE 52047.94, MAE 34833.32, R²: 0.91
+
+Tuned Model:
+MSE: 2261248388.40, RMSE 47552.59, MAE 31257.82, R²: 0.93
+Best Hyperparameters: {'metric': 'manhattan', 'n_neighbors': 11, 'weights': 'distance'}
