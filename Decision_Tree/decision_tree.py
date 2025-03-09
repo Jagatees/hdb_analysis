@@ -1,16 +1,18 @@
 import pandas as pd
 import numpy as np
+import seaborn as sns
+from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 # Load dataset
-df = pd.read_csv("dataset_for_model.csv")
+df = pd.read_csv("../csv/sampled_hdb_data.csv")
 # ['month','town','flat_type','storey_range','floor_area_sqm','flat_model', 'remaining_lease', 'resale_price','Score']
 
 # Define X and Y
-X_temp = df.drop(['resale_price', 'month', 'remaining_lease'], axis=1)
+X_temp = df[['town', 'flat_type', 'storey_range', 'floor_area_sqm', 'flat_model', 'remaining_lease', 'Score', 'region', 'storey_range_numeric']]
 y = df['resale_price']
 cat_cols = X_temp.select_dtypes(include=['object']).columns
 num_cols = X_temp.select_dtypes(exclude=['object']).columns
@@ -40,7 +42,7 @@ rmse = np.sqrt(mse)
 r2 = r2_score(y_test, y_pred)
 
 
-print(f"MSE: {mse:.2f}, RMSE {rmse:.2f}, MAE{mae:.2f}, R²: {r2:.2f}",)
+print(f"MSE: {mse:.2f}, RMSE: {rmse:.2f}, MAE: {mae:.2f}, R²: {r2:.2f}",)
 
 
 # Get feature importance scores
@@ -50,9 +52,21 @@ feature_importance = model.feature_importances_
 importance_df = pd.DataFrame({'Feature': X.columns, 'Importance': feature_importance})
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
 importance_df.to_csv("feature_importance.csv", index=False)
-top_10_features = importance_df.head(10)
-print(top_10_features)
+plt.figure(figsize=(10, 15))
+sns.barplot(x=importance_df['Importance'], y=importance_df['Feature'], palette='viridis')
+plt.xlabel("Feature Importance Score")
+plt.ylabel("Features")
+plt.title("Feature Importance")
+plt.savefig("base_graph/decision_tree_feature_importance.png", dpi=300, bbox_inches="tight")
 
+# Predicted vs Actual
+plt.figure(figsize=(8, 6))
+sns.scatterplot(x=y_test, y=y_pred, alpha=0.7)
+plt.xlabel("Actual Values")
+plt.ylabel("Predicted Values")
+plt.title("Actual vs Predicted")
+plt.axline((0, 0), slope=1, color="red", linestyle="dashed")  # Diagonal reference line
+plt.savefig("base_graph/decision_tree_actual_vs_predicted.png", dpi=300, bbox_inches="tight")
 
 # Test
 """

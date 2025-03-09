@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import seaborn as sns
+from matplotlib import pyplot as plt
 import joblib
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
@@ -7,10 +9,10 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 # Load dataset
-df = pd.read_csv("dataset_for_model.csv")
+df = pd.read_csv("../csv/sampled_hdb_data.csv")
 
 # Define X and Y
-X_temp = df.drop(['resale_price', 'month', 'remaining_lease'], axis=1)
+X_temp = df[['town', 'flat_type', 'storey_range', 'floor_area_sqm', 'flat_model', 'remaining_lease', 'Score', 'region', 'storey_range_numeric']]
 y = df['resale_price']
 
 # Identify categorical and numerical columns
@@ -34,9 +36,9 @@ X_test_scaled = scaler.transform(X_test)
 
 # Define Hyperparameter Grid for GridSearchCV
 param_grid = {
-    'max_depth': [10, 15, 20, 25],
-    'min_samples_split': [2, 5, 15, 30],
-    'min_samples_leaf': [1, 5, 10],
+    'max_depth': [10, 15, 20, 25, 30],
+    'min_samples_split': [2, 5, 15, 20, 30],
+    'min_samples_leaf': [1, 5, 10, 15],
     'ccp_alpha': [0.0, 0.001, 0.01, 0.1, 1.0]
 }
 
@@ -72,21 +74,28 @@ r2 = r2_score(y_test, y_pred)
 print(f"MSE: {mse:.2f}, RMSE, {rmse:.2f}, MAE,{mae:.2f}, R²: {r2:.2f}",)
 print("Best Parameters:", grid_search.best_params_)
 
-# Get Feature Importance from the best model
+# Get feature importance scores
 feature_importance = best_model.feature_importances_
 
-# Create a DataFrame to show the feature importance alongside the feature names
-importance_df = pd.DataFrame({
-    'Feature': X.columns,
-    'Importance': feature_importance
-})
-
-# Sort the DataFrame by importance (in descending order)
+# Feature Importance
+importance_df = pd.DataFrame({'Feature': X.columns, 'Importance': feature_importance})
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
+importance_df.to_csv("feature_importance.csv", index=False)
+plt.figure(figsize=(10, 15))
+sns.barplot(x=importance_df['Importance'], y=importance_df['Feature'], palette='viridis')
+plt.xlabel("Feature Importance Score")
+plt.ylabel("Features")
+plt.title("Feature Importance")
+plt.savefig("tuned_graph/decision_tree_feature_importance.png", dpi=300, bbox_inches="tight")
 
-# Print the top 10 most important features
-top_10_importance = importance_df.head(10)
-print(top_10_importance)
+# Predicted vs Actual
+plt.figure(figsize=(8, 6))
+sns.scatterplot(x=y_test, y=y_pred, alpha=0.7)
+plt.xlabel("Actual Values")
+plt.ylabel("Predicted Values")
+plt.title("Actual vs Predicted")
+plt.axline((0, 0), slope=1, color="red", linestyle="dashed")  # Diagonal reference line
+plt.savefig("tuned_graph/decision_tree_actual_vs_predicted.png", dpi=300, bbox_inches="tight")
 
 
 
