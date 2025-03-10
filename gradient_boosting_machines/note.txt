@@ -1,0 +1,7 @@
+graident boosting by it self is not enoguht we need either XGBoost or light GBM and cat boost cna offer significai -perforamce improv eover tradiiton gbm implements 
+
+
+XGBoost Regressor MSE: 3422298385.81
+XGBoost Regressor RMSE: 58500.41
+XGBoost Regressor MAE: 42238.39
+XGBoost Regressor R²: 0.8925
