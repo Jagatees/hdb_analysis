@@ -80,7 +80,7 @@ feature_importance = best_model.feature_importances_
 # Feature Importance
 importance_df = pd.DataFrame({'Feature': X.columns, 'Importance': feature_importance})
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
-importance_df.to_csv("feature_importance.csv", index=False)
+importance_df.to_csv("tuned_graph/feature_importance.csv", index=False)
 plt.figure(figsize=(10, 15))
 sns.barplot(x=importance_df['Importance'], y=importance_df['Feature'], palette='viridis')
 plt.xlabel("Feature Importance Score")

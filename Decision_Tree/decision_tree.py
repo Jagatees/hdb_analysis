@@ -13,7 +13,7 @@ df = pd.read_csv("../csv/sampled_hdb_data.csv")
 
 # Define X and Y
 X_temp = df[['town', 'flat_type', 'storey_range', 'floor_area_sqm', 'flat_model', 'remaining_lease', 'Score', 'region', 'storey_range_numeric']]
-y = df['resale_price']
+y = np.log1p(df['resale_price'])
 cat_cols = X_temp.select_dtypes(include=['object']).columns
 num_cols = X_temp.select_dtypes(exclude=['object']).columns
 X_cat = pd.get_dummies(X_temp[cat_cols], drop_first=True)
@@ -35,7 +35,7 @@ model.fit(X_train, y_train)
 
 
 # Prediction
-y_pred = model.predict(X_test)
+y_pred = np.expm1(model.predict(X_test))
 mse = mean_squared_error(y_test, y_pred)
 mae = mean_absolute_error(y_test, y_pred)
 rmse = np.sqrt(mse)
@@ -51,7 +51,7 @@ feature_importance = model.feature_importances_
 # Feature Importance
 importance_df = pd.DataFrame({'Feature': X.columns, 'Importance': feature_importance})
 importance_df = importance_df.sort_values(by='Importance', ascending=False)
-importance_df.to_csv("feature_importance.csv", index=False)
+importance_df.to_csv("base_graph/feature_importance.csv", index=False)
 plt.figure(figsize=(10, 15))
 sns.barplot(x=importance_df['Importance'], y=importance_df['Feature'], palette='viridis')
 plt.xlabel("Feature Importance Score")

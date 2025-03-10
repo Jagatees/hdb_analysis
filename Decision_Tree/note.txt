@@ -1,0 +1,11 @@
+Decision Tree:
+MSE:  716058947
+RMSE: 84620.2
+MAE:  57503.65
+R²:   0.78
+
+Decision Tree Tuned:
+MSE:  6402594732
+RMSE: 80016.22
+MAE:  55968.93
+R²:   0.80
