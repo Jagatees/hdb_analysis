@@ -1,145 +1,79 @@
 import pandas as pd
 import numpy as np
-import seaborn as sns
-from matplotlib import pyplot as plt
-import joblib
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# Load dataset
-df = pd.read_csv("../csv/sampled_hdb_data.csv")
+# Load dataset (excluding 2024 data)
+df = pd.read_csv("../csv/sampled_hdb_no2024_data.csv")
 
-# Define X and Y
-X_temp = df[['town', 'flat_type', 'storey_range', 'floor_area_sqm', 'flat_model', 'remaining_lease', 'Score', 'region', 'storey_range_numeric']]
-y = df['resale_price']
+# Load 2024 data for prediction
+df_2024 = pd.read_csv("../csv/sampled_hdb_2024_data.csv")
 
-# Identify categorical and numerical columns
-cat_cols = X_temp.select_dtypes(include=['object']).columns
-num_cols = X_temp.select_dtypes(exclude=['object']).columns
+# Define features and target variable
+features = ['year', 'month', 'flat_age', 'floor_area_sqm', 'storey_range_numeric', 'price_per_square_meter', 'remaining_lease']
+categorical_features = ['town', 'flat_type', 'flat_model', 'region']
+target = 'resale_price'
 
-# One-Hot Encoding for categorical columns
-X_cat = pd.get_dummies(X_temp[cat_cols], drop_first=True)
-X_num = X_temp[num_cols]
+# One-Hot Encoding for categorical features and scaling for numerical features
+preprocessor = ColumnTransformer([
+    ('num', StandardScaler(), features),
+    ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
+])
 
-# Merge categorical and numerical features
-X = pd.concat([X_num, X_cat], axis=1)
+# Define the Decision Tree pipeline
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', DecisionTreeRegressor(random_state=42))
+])
 
-# Train-Test Split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Normalization (Feature Scaling)
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# Define Hyperparameter Grid for GridSearchCV
+# Define hyperparameter grid for tuning the decision tree
 param_grid = {
-    'max_depth': [10, 15, 20, 25, 30],
-    'min_samples_split': [2, 5, 15, 20, 30],
-    'min_samples_leaf': [1, 5, 10, 15],
-    'ccp_alpha': [0.0, 0.001, 0.01, 0.1, 1.0]
+    'regressor__max_depth': [None, 5, 10, 15, 20],
+    'regressor__min_samples_split': [2, 5, 10],
+    'regressor__min_samples_leaf': [1, 2, 4]
 }
 
-# Initialize Decision Tree Model
-dt_model = DecisionTreeRegressor(random_state=42)
+# Set up GridSearchCV with 5-fold cross-validation
+grid_search = GridSearchCV(pipeline, param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1, verbose=1)
 
-# Set up GridSearchCV for hyperparameter tuning
-grid_search = GridSearchCV(
-    dt_model,
-    param_grid,
-    scoring='neg_mean_absolute_error',
-    cv=5,
-    n_jobs=-1,
-    verbose=1
-)
+# Prepare training and testing sets
+X = df[features + categorical_features]
+y = df[target]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train Model with GridSearchCV
-grid_search.fit(X_train_scaled, y_train)
+# Fit GridSearchCV to find the best hyperparameters
+grid_search.fit(X_train, y_train)
 
-# Get Best Model
+# Display best parameters and corresponding score
+print("Best parameters:", grid_search.best_params_)
+print("Best cross-validation score (negative MSE):", grid_search.best_score_)
+
+# Use the best estimator to evaluate on the test set
 best_model = grid_search.best_estimator_
+y_pred = best_model.predict(X_test)
 
-# Make Predictions
-y_pred = best_model.predict(X_test_scaled)
-
-# Evaluate Model Performance
+r2 = r2_score(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 mse = mean_squared_error(y_test, y_pred)
 mae = mean_absolute_error(y_test, y_pred)
-rmse = np.sqrt(mse)
-r2 = r2_score(y_test, y_pred)
 
+print(f"Decision Tree - R²: {r2:.4f}, RMSE: {rmse:.2f}, MSE: {mse:.2f}, MAE: {mae:.2f}")
 
-print(f"MSE: {mse:.2f}, RMSE, {rmse:.2f}, MAE,{mae:.2f}, R²: {r2:.2f}",)
-print("Best Parameters:", grid_search.best_params_)
+# Predict prices for the 2024 dataset
+X_2024 = df_2024[features + categorical_features]
+df_2024['predicted_resale_price'] = best_model.predict(X_2024)
 
-# Get feature importance scores
-feature_importance = best_model.feature_importances_
+# Calculate the overall loss percentage
+total_loss = np.sum(np.abs(df_2024['resale_price'] - df_2024['predicted_resale_price']))
+total_actual = np.sum(df_2024['resale_price'])
+loss_percentage = (total_loss / total_actual) * 100
 
-# Feature Importance
-importance_df = pd.DataFrame({'Feature': X.columns, 'Importance': feature_importance})
-importance_df = importance_df.sort_values(by='Importance', ascending=False)
-importance_df.to_csv("tuned_graph/feature_importance.csv", index=False)
-plt.figure(figsize=(10, 15))
-sns.barplot(x=importance_df['Importance'], y=importance_df['Feature'], palette='viridis')
-plt.xlabel("Feature Importance Score")
-plt.ylabel("Features")
-plt.title("Feature Importance")
-plt.savefig("tuned_graph/decision_tree_feature_importance.png", dpi=300, bbox_inches="tight")
+print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
 
-# Predicted vs Actual
-plt.figure(figsize=(8, 6))
-sns.scatterplot(x=y_test, y=y_pred, alpha=0.7)
-plt.xlabel("Actual Values")
-plt.ylabel("Predicted Values")
-plt.title("Actual vs Predicted")
-plt.axline((0, 0), slope=1, color="red", linestyle="dashed")  # Diagonal reference line
-plt.savefig("tuned_graph/decision_tree_actual_vs_predicted.png", dpi=300, bbox_inches="tight")
-
-
-
-# Save Best Model and Scaler for Streamlit Integration
-joblib.dump(best_model, "decision_tree_model.pkl")
-joblib.dump(scaler, "scaler.pkl")
-
-print("Decision Tree model and scaler saved successfully!")
-
-'''
-# Test with New Flat Data
-new_data = pd.DataFrame({
-    'month': ['2017-01'],
-    'town': ['Bedok'],
-    'flat_type': ['3-room'],
-    'storey_range': ['04 TO 06'],
-    'floor_area_sqm': [70],
-    'flat_model': ['New Generation'],
-    'remaining_lease': ['61 years 06 months'],
-    'resale_price': [280000],  # Not used for prediction
-    'Score': [53],
-})
-
-# Prepare New Data for Prediction
-X_newTemp = new_data.drop(['resale_price', 'month'], axis=1)
-cat_temp = X_newTemp.select_dtypes(include=['object']).columns
-num_temp = X_newTemp.select_dtypes(exclude=['object']).columns
-
-# One-Hot Encode the new data
-X_cat_new = pd.get_dummies(X_newTemp[cat_temp], drop_first=True)
-X_num_new = X_newTemp[num_temp]
-X_new = pd.concat([X_num_new, X_cat_new], axis=1)
-
-# Ensure the input matches training data columns
-missing_cols = set(X.columns) - set(X_new.columns)
-for col in missing_cols:
-    X_new[col] = 0  # Add missing categorical columns
-
-X_new = X_new[X.columns]  # Reorder columns to match training
-
-# Scale New Data
-X_new_scaled = scaler.transform(X_new)
-
-# Predict New Flat Price
-new_price_pred = best_model.predict(X_new_scaled)
-print(f"Predicted price for the new flat: {new_price_pred[0]:,.2f}")
-'''
+# Save predictions for the 2024 data
+df_2024.to_csv("./sampled_hdb_2024_predictions_DecisionTree_GridSearch.csv", index=False)
+print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_DecisionTree_GridSearch.csv")
