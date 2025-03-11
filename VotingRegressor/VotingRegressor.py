@@ -1,60 +1,83 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, VotingRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import VotingRegressor, RandomForestRegressor
+from xgboost import XGBRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# Load dataset
-df = pd.read_csv("../csv/sampled_hdb_data.csv")
+# Load datasets
+df = pd.read_csv("../csv/sampled_hdb_no2024_data.csv")
+df_2024 = pd.read_csv("../csv/sampled_hdb_2024_data.csv")
 
-# Define X and Y
-X_temp = df[['town', 'flat_type', 'storey_range', 'floor_area_sqm',
-             'flat_model', 'remaining_lease', 'Score', 'region', 'storey_range_numeric']]
-y = df['resale_price']
+# Define features and target
+features = ['year', 'month', 'flat_age', 'floor_area_sqm', 
+            'storey_range_numeric', 'price_per_square_meter', 'remaining_lease']
+categorical_features = ['town', 'flat_type', 'flat_model', 'region']
+target = 'resale_price'
 
-# One-hot encoding categorical columns
-cat_cols = ['town', 'flat_type', 'storey_range', 'flat_model', 'region']
-num_cols = ['floor_area_sqm', 'remaining_lease', 'Score', 'storey_range_numeric']
-X_cat = pd.get_dummies(X_temp[cat_cols], drop_first=True)
-X_num = X_temp[num_cols]
-X = pd.concat([X_num, X_cat], axis=1)
-
-# Split dataset
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Scale features
-scaler = RobustScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# Initialize individual regressors
-rf = RandomForestRegressor(n_estimators=100, random_state=42)
-gb = GradientBoostingRegressor(n_estimators=100, random_state=42)
-lr = LinearRegression()
-
-# Create the Voting Regressor
-voting_regressor = VotingRegressor(estimators=[
-    ('rf', rf),
-    ('gb', gb),
-    ('lr', lr)
+# Define preprocessing: scale numerical features and one-hot encode categorical features.
+preprocessor = ColumnTransformer([
+    ('num', StandardScaler(), features),
+    ('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), categorical_features)
 ])
 
-# Train the Voting Regressor
-voting_regressor.fit(X_train_scaled, y_train)
+# Create a pipeline for XGBoost with tuned parameters (assumed from GridSearchCV results)
+pipeline_xgb = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', XGBRegressor(
+        random_state=42, 
+        objective='reg:squarederror',
+        n_estimators=200,       # example tuned value
+        max_depth=5,            # example tuned value
+        learning_rate=0.1,      # example tuned value
+        subsample=0.8,          # example tuned value
+        colsample_bytree=0.8    # example tuned value
+    ))
+])
 
-# Make predictions
-y_pred = voting_regressor.predict(X_test_scaled)
+# Create a pipeline for RandomForest (base)
+pipeline_rf = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', RandomForestRegressor(random_state=42))
+])
 
-# Evaluate the model
-mse = mean_squared_error(y_test, y_pred)
-rmse = np.sqrt(mse)
-mae = mean_absolute_error(y_test, y_pred)
+# Combine both pipelines into a Voting Regressor
+voting_regressor = VotingRegressor(estimators=[
+    ('xgb', pipeline_xgb),
+    ('rf', pipeline_rf)
+])
+
+# Prepare train/test split
+X = df[features + categorical_features]
+y = df[target]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Fit the Voting Regressor on the training data
+voting_regressor.fit(X_train, y_train)
+
+# Evaluate on the test set
+y_pred = voting_regressor.predict(X_test)
 r2 = r2_score(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+mae = mean_absolute_error(y_test, y_pred)
 
-# Display results
-print(f"Voting Regressor MSE: {mse:.2f}")
-print(f"Voting Regressor RMSE: {rmse:.2f}")
-print(f"Voting Regressor MAE: {mae:.2f}")
-print(f"Voting Regressor R²: {r2:.4f}")
+print("Voting Regressor Performance:")
+print(f"R²: {r2:.4f}, RMSE: {rmse:.2f}, MAE: {mae:.2f}")
+
+# Predict prices for the 2024 dataset
+X_2024 = df_2024[features + categorical_features]
+df_2024['predicted_resale_price'] = voting_regressor.predict(X_2024)
+
+# Calculate overall prediction loss percentage
+total_loss = np.sum(np.abs(df_2024['resale_price'] - df_2024['predicted_resale_price']))
+total_actual = np.sum(df_2024['resale_price'])
+loss_percentage = (total_loss / total_actual) * 100
+
+print(f"Voting Regressor Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
+
+# Save predictions for the 2024 data
+df_2024.to_csv("./sampled_hdb_2024_predictions_VotingRegressor.csv", index=False)
+print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_VotingRegressor.csv")

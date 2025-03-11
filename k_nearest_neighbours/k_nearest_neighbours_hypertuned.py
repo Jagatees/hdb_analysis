@@ -1,67 +1,83 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 import numpy as np
-from sklearn.model_selection import GridSearchCV
-import seaborn as sns
-import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# Load dataset
-# df = pd.read_csv("dataset_for_model.csv")
-df = pd.read_csv("sampled_hdb_data.csv")
+# Load dataset (excluding 2024 data)
+df = pd.read_csv("../csv/sampled_hdb_no2024_data.csv")
 
-# Define X and Y
-# X_temp = df.drop(['resale_price', 'month', 'town', 'storey_range'], axis=1)
-X_temp = df[['year', 'flat_type', 'floor_area_sqm', 'remaining_lease', 'Score', 'storey_range_numeric', 'region']]
-y = df['resale_price']
+# Load 2024 data for prediction
+df_2024 = pd.read_csv("../csv/sampled_hdb_2024_data.csv")
 
-# Extract numerical and categorical values
-cat_cols = X_temp.select_dtypes(include=['object']).columns
-num_cols = X_temp.select_dtypes(exclude=['object']).columns
-X_cat = pd.get_dummies(X_temp[cat_cols], drop_first=True)
-X_num = X_temp[num_cols]
-X = pd.concat([X_num, X_cat], axis=1)
+# Define features and target variable
+features = ['year', 'month', 'flat_age', 'floor_area_sqm', 
+            'storey_range_numeric', 'price_per_square_meter', 'remaining_lease']
+categorical_features = ['town', 'flat_type', 'flat_model', 'region']
+target = 'resale_price'
 
-# Split into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Preprocessing: Standardize numerical features and one-hot encode categorical features
+# Use sparse_output=False to get a dense array.
+preprocessor = ColumnTransformer([
+    ('num', StandardScaler(), features),
+    ('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), categorical_features)
+])
 
-# Normalisation
-ct = ColumnTransformer(
-    transformers=[
-        ('num', StandardScaler(), num_cols)
-    ],
-    remainder='passthrough'  # This leaves the one-hot columns unchanged
-)
-X_train_scaled = ct.fit_transform(X_train)
-X_test_scaled = ct.transform(X_test)
+# Define the pipeline with KNeighborsRegressor
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', KNeighborsRegressor())
+])
 
-# Hyperparameter grid
+# Define hyperparameter grid for KNeighborsRegressor
 param_grid = {
-    'n_neighbors': list(range(1, 21)),  # K-values from 1 to 20
-    'metric': ['euclidean', 'manhattan', 'chebyshev', 'minkowski'],
-    'weights': ['uniform', 'distance']
+    'regressor__n_neighbors': [3, 5, 7, 9, 11],
+    'regressor__weights': ['uniform', 'distance'],
+    'regressor__p': [1, 2]  # 1 for Manhattan, 2 for Euclidean distance
 }
 
-# Train KNN model
-model = KNeighborsRegressor()
-grid_search = GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_absolute_error', n_jobs=-1, verbose=2)
-grid_search.fit(X_train_scaled, y_train)
+# Set up GridSearchCV with 5-fold cross-validation
+grid_search = GridSearchCV(pipeline, param_grid, cv=5,
+                           scoring='neg_mean_squared_error', n_jobs=-1, verbose=1)
 
-# Show best params
-best_params = grid_search.best_params_
-print(f"Best Hyperparameters: {best_params}")
+# Prepare training and testing sets
+X = df[features + categorical_features]
+y = df[target]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train best model
-best_knn = grid_search.best_estimator_
+# Fit GridSearchCV to find the best hyperparameters
+grid_search.fit(X_train, y_train)
 
-# Predict target values for the normalized test set
-y_pred = best_knn.predict(X_test_scaled)
+# Display best parameters and corresponding score
+print("Best parameters:", grid_search.best_params_)
+print("Best cross-validation score (negative MSE):", grid_search.best_score_)
+
+# Use the best estimator to evaluate on the test set
+best_model = grid_search.best_estimator_
+y_pred = best_model.predict(X_test)
+
+# Compute evaluation metrics
+r2 = r2_score(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 mse = mean_squared_error(y_test, y_pred)
 mae = mean_absolute_error(y_test, y_pred)
-rmse = np.sqrt(mse)
-r2 = r2_score(y_test, y_pred)
-print(f"Default Model:")
-print(f"MSE: {mse:.2f}, RMSE {rmse:.2f}, MAE {mae:.2f}, R²: {r2:.2f}",)
+
+print(f"KNN with GridSearch - R²: {r2:.4f}, RMSE: {rmse:.2f}, MSE: {mse:.2f}, MAE: {mae:.2f}")
+
+# Predict prices for the 2024 dataset
+X_2024 = df_2024[features + categorical_features]
+df_2024['predicted_resale_price'] = best_model.predict(X_2024)
+
+# Calculate overall loss percentage
+total_loss = np.sum(np.abs(df_2024['resale_price'] - df_2024['predicted_resale_price']))
+total_actual = np.sum(df_2024['resale_price'])
+loss_percentage = (total_loss / total_actual) * 100
+
+print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
+
+# Save predictions for the 2024 data
+df_2024.to_csv("./sampled_hdb_2024_predictions_KNN_GridSearch.csv", index=False)
+print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_KNN_GridSearch.csv")

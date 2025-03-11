@@ -1,132 +1,84 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.preprocessing import RobustScaler
-import matplotlib.pyplot as plt
-import math
-import joblib
-import time
-import os
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# Create the output directory for fine-tuned model plots
-os.makedirs("random_forest_fine_tune", exist_ok=True)
+# Load dataset (excluding 2024 data)
+df = pd.read_csv("../csv/sampled_hdb_no2024_data.csv")
 
-# Load dataset
-df = pd.read_csv("../csv/sampled_hdb_data.csv")
+# Load 2024 data for prediction
+df_2024 = pd.read_csv("../csv/sampled_hdb_2024_data.csv")
 
-# Define X and Y using the correct columns
-X_temp = df[['town', 'flat_type', 'storey_range', 'floor_area_sqm', 'flat_model', 'remaining_lease', 'Score', 'region', 'storey_range_numeric']]
-y = df['resale_price']
+# Define features and target variable
+features = ['year', 'month', 'flat_age', 'floor_area_sqm', 
+            'storey_range_numeric', 'price_per_square_meter', 'remaining_lease']
+categorical_features = ['town', 'flat_type', 'flat_model', 'region']
+target = 'resale_price'
 
-# Handling categorical and numerical columns
-cat_cols = ['town', 'flat_type', 'storey_range', 'flat_model', 'region']  # Updated categorical columns
-num_cols = ['floor_area_sqm', 'remaining_lease', 'Score', 'storey_range_numeric']  # Updated numerical columns
+# Preprocessing: Standardize numerical features and one-hot encode categorical features.
+# Setting sparse_output=False ensures we have a dense matrix for downstream models.
+preprocessor = ColumnTransformer([
+    ('num', StandardScaler(), features),
+    ('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), categorical_features)
+])
 
-X_cat = pd.get_dummies(X_temp[cat_cols], drop_first=True)
-X_num = X_temp[num_cols]
-X = pd.concat([X_num, X_cat], axis=1)
+# Create the pipeline with RandomForestRegressor
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', RandomForestRegressor(random_state=42))
+])
 
-# Split dataset. 80% train, 20% test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# RobustScaler to handle outliers better
-scaler = RobustScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# Train Random Forest with Default Parameters
-start_time = time.time()  # Start timing
-rf_default = RandomForestRegressor(random_state=42, n_jobs=-1)
-rf_default.fit(X_train_scaled, y_train)
-elapsed_time = time.time() - start_time  # Time taken to train the model
-
-# Make predictions
-y_pred_rf = rf_default.predict(X_test_scaled)
-
-# Evaluate performance
-mse_rf = mean_squared_error(y_test, y_pred_rf)
-rmse_rf = math.sqrt(mse_rf)
-mae_rf = mean_absolute_error(y_test, y_pred_rf)
-r2_rf = r2_score(y_test, y_pred_rf)
-
-# Display results
-print(f"Random Forest Default Parameters: MSE={mse_rf:.2f}, RMSE={rmse_rf:.2f}, MAE={mae_rf:.2f}, R²={r2_rf:.4f}")
-print(f"Model training completed in {elapsed_time:.2f} seconds.")
-
-# Hyperparameter tuning via GridSearchCV
+# Define hyperparameter grid for tuning the RandomForestRegressor
 param_grid = {
-    'n_estimators': [50, 100, 150],
-    'max_depth': [None, 10, 20],
-    'min_samples_split': [2, 8, 16],
-    'min_samples_leaf': [1, 3, 5],
-    'max_features': ['auto', 'sqrt'],
-    'bootstrap': [True, False]  # Adding bootstrap to see if it helps with overfitting
+    'regressor__n_estimators': [100, 200, 300],
+    'regressor__max_depth': [None, 10, 20, 30],
+    'regressor__min_samples_split': [2, 5, 10],
+    'regressor__min_samples_leaf': [1, 2, 4],
+    'regressor__max_features': ['auto', 'sqrt']
 }
 
-grid_search = GridSearchCV(
-    estimator=RandomForestRegressor(random_state=42),
-    param_grid=param_grid,
-    cv=5,
-    scoring='neg_mean_squared_error',
-    verbose=2,
-    n_jobs=-1
-)
-grid_search.fit(X_train_scaled, y_train)
+# Set up GridSearchCV with 5-fold cross-validation
+grid_search = GridSearchCV(pipeline, param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1, verbose=1)
 
-# Get the best estimator
+# Prepare training and testing sets
+X = df[features + categorical_features]
+y = df[target]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Fit GridSearchCV to find the best hyperparameters
+grid_search.fit(X_train, y_train)
+
+# Display best parameters and corresponding score
+print("Best parameters:", grid_search.best_params_)
+print("Best cross-validation score (negative MSE):", grid_search.best_score_)
+
+# Use the best estimator to evaluate on the test set
 best_model = grid_search.best_estimator_
+y_pred = best_model.predict(X_test)
 
-# Make predictions with the tuned model
-y_pred_tuned = best_model.predict(X_test_scaled)
+# Compute evaluation metrics
+r2 = r2_score(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+mse = mean_squared_error(y_test, y_pred)
+mae = mean_absolute_error(y_test, y_pred)
 
-# Calculate metrics
-mse_tuned = mean_squared_error(y_test, y_pred_tuned)
-rmse_tuned = math.sqrt(mse_tuned)
-mae_tuned = mean_absolute_error(y_test, y_pred_tuned)
-r2_tuned = r2_score(y_test, y_pred_tuned)
+print(f"RandomForest with GridSearch - R²: {r2:.4f}, RMSE: {rmse:.2f}, MSE: {mse:.2f}, MAE: {mae:.2f}")
 
-print(f"Random Forest Tuned Parameters: MSE={mse_tuned:.2f}, RMSE={rmse_tuned:.2f}, MAE={mae_tuned:.2f}, R²={r2_tuned:.4f}")
+# Predict prices for the 2024 dataset
+X_2024 = df_2024[features + categorical_features]
+df_2024['predicted_resale_price'] = best_model.predict(X_2024)
 
-# Save the tuned model
-joblib.dump(best_model, 'random_forest_tuned_model.pkl')
-print("Tuned model saved as 'random_forest_tuned_model.pkl'")
+# Calculate overall loss percentage
+total_loss = np.sum(np.abs(df_2024['resale_price'] - df_2024['predicted_resale_price']))
+total_actual = np.sum(df_2024['resale_price'])
+loss_percentage = (total_loss / total_actual) * 100
 
-# ------------------------------
-# Plotting for the Tuned Model
-# ------------------------------
+print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
 
-# 1. Feature Importance Plot
-feature_importances_tuned = best_model.feature_importances_
-features = X_train.columns
-sorted_indices = np.argsort(feature_importances_tuned)[::-1]
-
-plt.figure(figsize=(10, 8))
-plt.title('Tuned Model Feature Importances')
-plt.bar(range(X_train.shape[1]), feature_importances_tuned[sorted_indices], align='center')
-plt.xticks(range(X_train.shape[1]), features[sorted_indices], rotation=90)
-plt.tight_layout()
-plt.savefig('random_forest_fine_tune/tuned_feature_importances.png', dpi=300, bbox_inches='tight')
-plt.show()
-
-# 2. Actual vs. Predicted Plot
-plt.figure(figsize=(10, 8))
-plt.scatter(y_test, y_pred_tuned, alpha=0.5)
-plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
-plt.xlabel('Actual')
-plt.ylabel('Predicted')
-plt.title('Tuned Model: Actual vs. Predicted')
-plt.savefig('random_forest_fine_tune/tuned_actual_vs_pred.png', dpi=300, bbox_inches='tight')
-plt.show()
-
-# 3. Residual Plot
-residuals_tuned = y_test - y_pred_tuned
-plt.figure(figsize=(10, 8))
-plt.scatter(y_pred_tuned, residuals_tuned, alpha=0.5)
-plt.hlines(0, y_pred_tuned.min(), y_pred_tuned.max(), colors='red', linestyles='--')
-plt.xlabel('Predicted')
-plt.ylabel('Residuals')
-plt.title('Tuned Model Residuals Plot')
-plt.savefig('random_forest_fine_tune/tuned_residuals.png', dpi=300, bbox_inches='tight')
-plt.show()
+# Save predictions for the 2024 data
+df_2024.to_csv("./sampled_hdb_2024_predictions_RandomForest_GridSearch.csv", index=False)
+print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest_GridSearch.csv")

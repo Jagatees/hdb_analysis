@@ -1,7 +1,8 @@
-graident boosting by it self is not enoguht we need either XGBoost or light GBM and cat boost cna offer significai -perforamce improv eover tradiiton gbm implements 
+XGBoost - R²: 0.9983, RMSE: 6935.59, MSE: 48102372.46, MAE: 3597.95
+Overall Prediction Loss Percentage: 1.14%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_XGBoost.csv (base)
 
-
-XGBoost Regressor MSE: 3422298385.81
-XGBoost Regressor RMSE: 58500.41
-XGBoost Regressor MAE: 42238.39
-XGBoost Regressor R²: 0.8925
+Best cross-validation score (negative MSE): -33969470.507229134
+XGBoost with GridSearch - R²: 0.9987, RMSE: 6015.45, MSE: 36185613.49, MAE: 2321.63
+Overall Prediction Loss Percentage: 0.86%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_XGBoost_GridSearch.csv

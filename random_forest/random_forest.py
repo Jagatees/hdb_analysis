@@ -1,78 +1,67 @@
-import math
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import RobustScaler
-import time
-import os
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# Optional: Create the "images" folder if it doesn't exist
-os.makedirs("random_forest", exist_ok=True)
+# Load dataset (excluding 2024 data)
+df = pd.read_csv("../csv/sampled_hdb_no2024_data.csv")
 
-# Load dataset and preprocess
-df = pd.read_csv("../csv/sampled_hdb_data.csv")
-X_temp = df[['town', 'flat_type', 'storey_range', 'floor_area_sqm', 'flat_model', 'remaining_lease', 'Score', 'region', 'storey_range_numeric']]
-y = df['resale_price']
+# Load 2024 data for prediction
+df_2024 = pd.read_csv("../csv/sampled_hdb_2024_data.csv")
 
-cat_cols = ['town', 'flat_type', 'storey_range', 'flat_model', 'region']
-num_cols = ['floor_area_sqm', 'remaining_lease', 'Score', 'storey_range_numeric']
+# Define features and target variable
+features = ['year', 'month', 'flat_age', 'floor_area_sqm', 
+            'storey_range_numeric', 'price_per_square_meter', 'remaining_lease']
+categorical_features = ['town', 'flat_type', 'flat_model', 'region']
+target = 'resale_price'
 
-X_cat = pd.get_dummies(X_temp[cat_cols], drop_first=True)
-X_num = X_temp[num_cols]
-X = pd.concat([X_num, X_cat], axis=1)
+# Preprocessing: Standardize numerical features and one-hot encode categorical features.
+# Set sparse_output=False to ensure a dense matrix for compatibility.
+preprocessor = ColumnTransformer([
+    ('num', StandardScaler(), features),
+    ('cat', OneHotEncoder(handle_unknown='ignore', sparse_output=False), categorical_features)
+])
 
+# Define the pipeline with RandomForestRegressor (using default hyperparameters)
+pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', RandomForestRegressor(random_state=42))
+])
+
+# Split the data into training and testing sets
+X = df[features + categorical_features]
+y = df[target]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Scale features
-scaler = RobustScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+# Train the model
+pipeline.fit(X_train, y_train)
 
-# Train and evaluate model
-rf_default = RandomForestRegressor(random_state=42, n_jobs=-1)
-rf_default.fit(X_train_scaled, y_train)
-y_pred_rf = rf_default.predict(X_test_scaled)
+# Make predictions on the test set
+y_pred = pipeline.predict(X_test)
 
-mse_rf = mean_squared_error(y_test, y_pred_rf)
-rmse_rf = math.sqrt(mse_rf)
-mae_rf = mean_absolute_error(y_test, y_pred_rf)
-r2_rf = r2_score(y_test, y_pred_rf)
+# Evaluate performance
+r2 = r2_score(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+mse = mean_squared_error(y_test, y_pred)
+mae = mean_absolute_error(y_test, y_pred)
 
-print(f"Random Forest Default Parameters: MSE={mse_rf:.2f}, RMSE={rmse_rf:.2f}, MAE={mae_rf:.2f}, R²={r2_rf:.4f}")
+print(f"RandomForestRegressor (base) - R²: {r2:.4f}, RMSE: {rmse:.2f}, MSE: {mse:.2f}, MAE: {mae:.2f}")
 
-# 1. Feature Importance Plot
-feature_importances = rf_default.feature_importances_
-features = X_train.columns
-sorted_indices = np.argsort(feature_importances)[::-1]
+# Predict prices for the 2024 dataset
+X_2024 = df_2024[features + categorical_features]
+df_2024['predicted_resale_price'] = pipeline.predict(X_2024)
 
-plt.figure(figsize=(10, 8))
-plt.title('Feature Importances')
-plt.bar(range(X_train.shape[1]), feature_importances[sorted_indices], align='center')
-plt.xticks(range(X_train.shape[1]), features[sorted_indices], rotation=90)
-plt.tight_layout()
-plt.savefig('random_forest/random_forest_base_feature_importances.png', dpi=300, bbox_inches='tight')
-plt.show()
+# Calculate overall loss percentage
+total_loss = np.sum(np.abs(df_2024['resale_price'] - df_2024['predicted_resale_price']))
+total_actual = np.sum(df_2024['resale_price'])
+loss_percentage = (total_loss / total_actual) * 100
 
-# 2. Actual vs. Predicted Plot
-plt.figure(figsize=(10, 8))
-plt.scatter(y_test, y_pred_rf, alpha=0.5)
-plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
-plt.xlabel('Actual')
-plt.ylabel('Predicted')
-plt.title('Actual vs. Predicted')
-plt.savefig('random_forest/random_forest_base_actual_vs_pred.png', dpi=300, bbox_inches='tight')
-plt.show()
+print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
 
-# 3. Residual Plot
-residuals = y_test - y_pred_rf
-plt.figure(figsize=(10, 8))
-plt.scatter(y_pred_rf, residuals, alpha=0.5)
-plt.hlines(0, y_pred_rf.min(), y_pred_rf.max(), colors='red', linestyles='--')
-plt.xlabel('Predicted')
-plt.ylabel('Residuals')
-plt.title('Residuals Plot')
-plt.savefig('random_forest/random_forest_base_residuals.png', dpi=300, bbox_inches='tight')
-plt.show()
+# Save predictions for the 2024 data
+df_2024.to_csv("./sampled_hdb_2024_predictions_RandomForest.csv", index=False)
+print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest.csv")

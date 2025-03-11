@@ -1,22 +1,12 @@
+RandomForestRegressor (base) - R²: 0.9989, RMSE: 5486.20, MSE: 30098416.74, MAE: 1904.44
+Overall Prediction Loss Percentage: 0.70%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest.csv (base)
 
-Random Forest Default Parameters: MSE=3733585957.81, RMSE=61103.08, MAE=43206.62, R²=0.8827
-Random Forest Tuned Parameters: MSE=4455529082.48, RMSE=66749.75, MAE=48039.25, R²=0.8600
-Base Model Better
 
 
-Reasoned for a few seconds
-Here is a concise summary of why the base Random Forest model outperformed the fine-tuned version in your particular scenario:
+(finetuned)
 
-Overfitting from Tuning
-When you expanded or adjusted the hyperparameters, the model may have become too specialized to the training set, reducing its ability to generalize to unseen data. In contrast, the base model, with simpler or more conservative settings, did not overfit as much.
-
-Parameter Search Space
-The default hyperparameters for a Random Forest are often quite robust for many datasets. If the parameter grid you used for tuning didn’t include values close to those defaults—or if it ventured into overly complex or restrictive settings—the model could end up performing worse.
-
-Complexity vs. Data Characteristics
-The data may not have needed a more complex model. Sometimes, fine-tuning introduces complexity that doesn’t align well with the dataset’s underlying patterns, whereas the defaults are well-balanced between bias and variance.
-
-Cross-Validation and Random Variations
-Random seeds, the specific cross-validation splits, or small differences in how the data is partitioned can all influence results. The default model might simply have matched your dataset’s characteristics better during training and validation.
-
-Overall, these factors can lead a fine-tuned model to underperform relative to a simpler base model, especially if the default parameters are already near-optimal for the data at hand.
+Best cross-validation score (negative MSE): -551964069.2134354
+RandomForest with GridSearch - R²: 0.9843, RMSE: 21014.69, MSE: 441617401.40, MAE: 13403.24
+Overall Prediction Loss Percentage: 4.65%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest_GridSearch.csv
