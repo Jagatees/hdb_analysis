@@ -14,7 +14,7 @@ df = pd.read_csv("../csv/sampled_hdb_no2024_data.csv")
 df_2024 = pd.read_csv("../csv/sampled_hdb_2024_data.csv")
 
 # Define features and target variable
-features = ['year', 'month', 'flat_age', 'floor_area_sqm', 'storey_range_numeric', 'price_per_square_meter', 'remaining_lease']
+features = ['year', 'month', 'floor_area_sqm', 'storey_range_numeric', 'price_per_square_meter', 'remaining_lease']
 categorical_features = ['town', 'flat_type', 'flat_model', 'region']
 target = 'resale_price'
 
