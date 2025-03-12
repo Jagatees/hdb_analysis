@@ -7,10 +7,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import VotingRegressor, RandomForestRegressor
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+# Load dataset (excluding 2024 data)
+df = pd.read_csv("../csv/2017 - 2023.csv")
 
-# Load datasets
-df = pd.read_csv("../csv/sampled_hdb_no2024_data.csv")
-df_2024 = pd.read_csv("../csv/sampled_hdb_2024_data.csv")
+# Load 2024 data for prediction
+df_2024 = pd.read_csv("../csv/2024.csv")
 
 # Define features and target
 features = ['year', 'month', 'floor_area_sqm', 
