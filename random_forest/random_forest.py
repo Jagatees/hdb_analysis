@@ -13,9 +13,20 @@ df = pd.read_csv("../csv/2017 - 2023.csv")
 df_2024 = pd.read_csv("../csv/2024.csv")
 
 # Define features and target variable
-features = ['year', 'month',  'floor_area_sqm', 
-            'storey_range_numeric', 'price_per_square_meter', 'remaining_lease']
-categorical_features = ['town', 'flat_type', 'flat_model', 'region']
+features = [
+    'year',
+    'month',
+    'floor_area_sqm',
+    'storey_range_numeric',
+    'price_per_square_meter',
+    'remaining_lease'
+]
+categorical_features = [
+    'town',
+    'flat_type',
+    'flat_model',
+    'region'
+]
 target = 'resale_price'
 
 # Preprocessing: Standardize numerical features and one-hot encode categorical features.
@@ -62,5 +73,5 @@ loss_percentage = (total_loss / total_actual) * 100
 print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
 
 # Save predictions for the 2024 data
-df_2024.to_csv("./sampled_hdb_2024_predictions_RandomForest.csv", index=False)
+df_2024.to_csv("../csv_predicated_model/RandomForest.csv", index=False)
 print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest.csv")
