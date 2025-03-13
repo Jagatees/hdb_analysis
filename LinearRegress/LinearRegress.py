@@ -19,8 +19,8 @@ features = [
     'month',
     'floor_area_sqm',
     'storey_range_numeric',
-    'price_per_square_meter',
-    'remaining_lease'
+    'remaining_lease',
+    'score'
 ]
 categorical_features = [
     'town',
