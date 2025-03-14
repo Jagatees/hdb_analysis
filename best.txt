@@ -1,16 +1,23 @@
-Stacking Regressor Performance:
-R²: 0.9472, MSE: 1463070655.89, RMSE: 38250.11, MAE: 27024.72
-Stacking Regressor Overall Prediction Loss Percentage: 8.06%
-Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_StackingRegressor.csv  - xg + xg boost
 
-XGBoost - R²: 0.9460, RMSE: 38710.85, MSE: 1498530194.50, MAE: 27413.72
-Overall Prediction Loss Percentage: 8.39%
-Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_XGBoost.csv - xg boost
-
-
+1) 
 Fitting 5 folds for each of 72 candidates, totalling 360 fits
 Best parameters: {'regressor__colsample_bytree': 0.8, 'regressor__learning_rate': 0.1, 'regressor__max_depth': 7, 'regressor__n_estimators': 200, 'regressor__subsample': 0.8}
 Best cross-validation score (negative MSE): -1391234925.4543757
 XGBoost with GridSearch - R²: 0.9498, RMSE: 37297.22, MSE: 1391082733.51, MAE: 26133.19
 Overall Prediction Loss Percentage: 8.20%
 Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_XGBoost_GridSearch.csv - xg boost hypeparetmeer
+
+
+2)
+Stacking Regressor Performance:
+R²: 0.9472, MSE: 1463070655.89, RMSE: 38250.11, MAE: 27024.72
+Stacking Regressor Overall Prediction Loss Percentage: 8.06%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_StackingRegressor.csv  - xg + xg boost
+
+
+
+3)
+XGBoost - R²: 0.9460, RMSE: 38710.85, MSE: 1498530194.50, MAE: 27413.72
+Overall Prediction Loss Percentage: 8.39%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_XGBoost.csv - xg boost
+
