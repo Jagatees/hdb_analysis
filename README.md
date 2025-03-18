@@ -10,8 +10,23 @@ By integrating machine learning techniques, this project aims to assist homeowne
 
 ## Dataset
 
-HDB resale price prediction: https://data.gov.sg/dataset/resale-flat-prices
+### HDB resale price prediction:
+- https://data.gov.sg/dataset/resale-flat-prices
 
+### Coordinates of Amenities:
+Shopping Mall: 
+- https://www.kaggle.com/datasets/karthikgangula/shopping-mall-coordinates?resource=download  
+School: 
+- https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view  
+Bus Stop: 
+- https://www.kaggle.com/datasets/gowthamvarma/singapore-bus-data-land-transport-authority/data  
+MRT Station: 
+- https://www.kaggle.com/datasets/shengjunlim/singapore-mrt-lrt-stations-with-coordinates?resource=download 
+- https://www.kaggle.com/datasets/yxlee245/singapore-train-station-coordinates
+Polyclinics: 
+- https://www.arcgis.com/home/item.html?id=f3c1113a2c554716a2a1a0d3632dd9ed&sublayer=0#data
+Hospital:
+- 
 
 ## 🚀 Features
 
@@ -58,6 +73,11 @@ These categorical variables provide **contextual information** about the flats:
 | 3  | **Flat Model** | Categorical Text  | Indicates the **design and layout** of the unit (e.g., **Model A, Improved, Maisonette**). |
 | 4  | **Region**  | Categorical Text  | Groups towns into **broader regions** (e.g., **Central, North, East, West, Northeast**) for location-based trends. |
 
+### **Data Information**
+Numerical features 1-5 and Categorical Features 1-4 were derived from the dataset found in [HDB resale price prediction](https://data.gov.sg/dataset/resale-flat-prices)  
+
+Numerical features 6 (Score) is devired from adding weights to each of the amenities listed in the dataset as well as Floor Area and Lease Remaing to generate a score for each of the HDB listed in the [dataset](https://data.gov.sg/dataset/resale-flat-prices)
+
 ---
 
 ## 🔍 **Feature Selection**
@@ -100,15 +120,16 @@ Unlike random train-test splits, our **time-based approach** prevents **data lea
 
 We evaluated multiple models, and here are the top three based on performance metrics:
 
-| Rank | Model                                   | R² Score | RMSE (SGD)  | MSE (SGD²)        | MAE (SGD)  | Prediction Loss % |
-|------|------------------------------------------|---------|-------------|-------------------|-------------|------------------|
-| 1️⃣  | **XGBoost with GridSearch** (Best)       | **0.9498** | **37,297.22** | **1,391,082,733.51** | **26,133.19** | **8.20%** |
-| 2️⃣  | **Stacking Regressor (XG + XGBoost)**     | 0.9472  | 38,250.11   | 1,463,070,655.89  | 27,024.72   | 8.06%  |
-| 3️⃣  | **XGBoost (Standard)**                   | 0.9460  | 38,710.85   | 1,498,530,194.50  | 27,413.72   | 8.39%  |
-| 4️⃣  | **RandomForest with GridSearch**          | 0.9312  | 43,671.19   | 1,907,172,613.87  | 29,655.97   | 10.32% |
-| 5️⃣  | **RandomForestRegressor (Base)**          | 0.9290  | 44,355.55   | 1,967,414,894.78  | 29,697.01   | 9.09%  |
-| 6️⃣  | **KNN with GridSearch**                   | 0.9058  | 51,121.55   | 2,613,413,116.25  | 34,805.14   | 11.44% |
-| 7️⃣  | **KNeighborsRegressor (Base)**            | 0.8831  | 56,945.11   | 3,242,746,014.74  | 38,346.69   | 10.62% |
-| 8️⃣  | **Decision Tree with GridSearch**         | 0.8810  | 57,435.65   | 3,298,853,944.70  | 38,937.18   | 10.17% |
-| 9️⃣  | **Decision Tree**                         | 0.8701  | 60,009.04   | 3,601,085,294.17  | 40,872.11   | 10.39% |
-| 🔟  | **Linear Regression**                     | 0.8626  | 61,724.76   | 3,809,946,402.46  | 48,092.03   | 9.76%  |
+| Rank | Model                                 | R² Score | RMSE       | MSE               | MAE        | Loss Percentage % |
+|------|---------------------------------------|----------|------------|-------------------|------------|-------------------|
+| 1️⃣  | **Stacking Regressor (XG + XGBoost)** | 0.9472   | 38250.11   | 1,463,070,655.89  | 27,024.72  | 8.06              |
+| 2️⃣  | **XGBoost with GridSearch** (Best)    | 0.9498   | 37297.22   | 1,391,082,733.51  | 26,133.19  | 8.20              |
+| 3️⃣  | **XGBoost (Standard)**                | 0.9460   | 38710.85   | 1,498,530,194.50  | 27,413.72  | 8.39              |
+| 4️⃣  | **VotingRegresso**                    | 0.9420   | 40094.02   | 1,607,530,584.93  | 27,576.23  | 8.53              |
+| 5️⃣  | **RandomForestRegressor (Base)**      | 0.9290   | 44355.55   | 1,967,414,894.78  | 29,697.01  | 9.09              |
+| 6️⃣  | **Linear Regression**                 | 0.8626   | 61724.76   | 3,809,946,402.46  | 48,092.03  | 9.76              |
+| 7️⃣  | **Decision Tree with GridSearch**     | 0.8810   | 57435.65   | 3,298,853,944.70  | 38,937.18  | 10.17             |
+| 8️⃣  | **RandomForest with GridSearch**      | 0.9312   | 43671.19   | 1,907,172,613.87  | 29,655.97  | 10.32             |
+| 9️⃣  | **Decision Tree**                     | 0.8701   | 60009.04   | 3,601,085,294.17  | 40,872.11  | 10.39             |
+| 🔟  | **KNeighborsRegressor (Base)**        | 0.8831   | 56945.11   | 3,242,746,014.74  | 38,346.69  | 10.62             |
+| 1️⃣1️⃣  | **KNN with GridSearch**               | 0.9058   | 51121.55   | 2,613,413,116.25  | 34,805.14  | 11.44             |
