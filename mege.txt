@@ -1,0 +1,79 @@
+python3 decision_tree.py                                             
+Decision Tree - R²: 0.8701, RMSE: 60009.04, MSE: 3601085294.17, MAE: 40872.11
+Overall Prediction Loss Percentage: 10.39%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_DecisionTree.csv
+
+python3 decision_tree_hypertuned.py                                   
+Fitting 5 folds for each of 45 candidates, totalling 225 fits
+Best parameters: {'regressor__max_depth': 15, 'regressor__min_samples_leaf': 2, 'regressor__min_samples_split': 10}
+Best cross-validation score (negative MSE): -3216974107.353508
+Decision Tree - R²: 0.8810, RMSE: 57435.65, MSE: 3298853944.70, MAE: 38937.18
+Overall Prediction Loss Percentage: 10.17%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_DecisionTree_GridSearch.csv
+
+python3 xg.py                                            
+XGBoost - R²: 0.9460, RMSE: 38710.85, MSE: 1498530194.50, MAE: 27413.72
+Overall Prediction Loss Percentage: 8.39%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_XGBoost.csv
+
+python3 xg-finetune.py                                   
+Fitting 5 folds for each of 72 candidates, totalling 360 fits
+Best parameters: {'regressor__colsample_bytree': 0.8, 'regressor__learning_rate': 0.1, 'regressor__max_depth': 7, 'regressor__n_estimators': 200, 'regressor__subsample': 0.8}
+Best cross-validation score (negative MSE): -1391234925.4543757
+XGBoost with GridSearch - R²: 0.9498, RMSE: 37297.22, MSE: 1391082733.51, MAE: 26133.19
+Overall Prediction Loss Percentage: 8.20%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_XGBoost_GridSearch.csv
+
+python3 k_nearest_neighbours.py                                
+KNeighborsRegressor (base) - R²: 0.8831, RMSE: 56945.11, MSE: 3242746014.74, MAE: 38346.69
+Overall Prediction Loss Percentage: 10.62%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_KNN.csv
+
+ python3 k_nearest_neighbours_hypertuned.py                      
+Fitting 5 folds for each of 20 candidates, totalling 100 fits
+Best parameters: {'regressor__n_neighbors': 5, 'regressor__p': 1, 'regressor__weights': 'distance'}
+Best cross-validation score (negative MSE): -2550996821.811511
+KNN with GridSearch - R²: 0.9058, RMSE: 51121.55, MSE: 2613413116.25, MAE: 34805.14
+Overall Prediction Loss Percentage: 11.44%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_KNN_GridSearch.csv
+
+python3 LinearRegress.py                                              
+Linear Regression - R²: 0.8626, RMSE: 61724.76, MSE: 3809946402.46, MAE: 48092.03
+Overall Prediction Loss Percentage: 9.76%
+Predicted resale prices for 2024 saved to LinearRegress.csv
+
+python3 random_forest.py                                              
+RandomForestRegressor (base) - R²: 0.9290, RMSE: 44355.55, MSE: 1967414894.78, MAE: 29697.01
+Overall Prediction Loss Percentage: 9.09%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest.csv
+
+Best parameters: {'regressor__max_depth': 30, 'regressor__max_features': 'sqrt', 'regressor__min_samples_leaf': 1, 'regressor__min_samples_split': 2, 'regressor__n_estimators': 300}
+Best cross-validation score (negative MSE): -1904673976.374583
+RandomForest with GridSearch - R²: 0.9312, RMSE: 43671.19, MSE: 1907172613.87, MAE: 29655.97
+Overall Prediction Loss Percentage: 10.32%
+Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest_GridSearch.csv
+
+python3 stacking_regreser.py                                        
+Stacking Regressor Performance on Test Set:
+Performance Metrics:
+R²: 0.9472
+MSE: 1463070655.89
+RMSE: 38250.11
+MAE: 27024.72
+
+Stacking Regressor Overall Prediction Loss Percentage: 8.06%
+Predicted resale prices for 2024 saved to ../csv_predicated_model/stacking_regressor.csv
+
+
+python3 stacking_regreser.py VotingRegressor.py          
+Fitting the stacking regressor...
+
+Stacking Regressor Performance on Test Set:
+Performance Metrics:
+R²: 0.9472
+MSE: 1463070655.89
+RMSE: 38250.11
+MAE: 27024.72
+
+Stacking Regressor Overall Prediction Loss Percentage: 8.06%
+Predicted resale prices for 2024 saved to ../csv_predicated_model/stacking_regressor.csv
