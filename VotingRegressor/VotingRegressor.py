@@ -7,6 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import VotingRegressor, RandomForestRegressor
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
 # Load dataset (excluding 2024 data)
 df = pd.read_csv("../csv/2017 - 2023.csv")
 
@@ -72,11 +73,12 @@ voting_regressor.fit(X_train, y_train)
 # Evaluate on the test set
 y_pred = voting_regressor.predict(X_test)
 r2 = r2_score(y_test, y_pred)
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
 mae = mean_absolute_error(y_test, y_pred)
 
 print("Voting Regressor Performance:")
-print(f"R²: {r2:.4f}, RMSE: {rmse:.2f}, MAE: {mae:.2f}")
+print(f"R²: {r2:.4f}, MSE: {mse:.2f}, RMSE: {rmse:.2f}, MAE: {mae:.2f}")
 
 # Predict prices for the 2024 dataset
 X_2024 = df_2024[features + categorical_features]
@@ -91,42 +93,22 @@ print(f"Voting Regressor Overall Prediction Loss Percentage: {loss_percentage:.2
 
 # Save predictions for the 2024 data
 df_2024.to_csv("../csv_predicated_model/votiing-regresser.csv", index=False)
-print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_VotingRegressor.csv")
+print("Predicted resale prices for 2024 saved to votiing-regresser.csv")
 
+# Save model performance metrics to a CSV file
+performance_data = {
+    "Metric": ["Model", "R²", "MSE", "RMSE", "MAE", "Loss Percentage"],
+    "Value": ["VotingRegressor", r2, mse, rmse, mae, loss_percentage]
+}
+performance_df = pd.DataFrame(performance_data)
 
+# Append performance metrics to existing file if it exists
+performance_file = "../model_performance.csv"
+try:
+    existing_df = pd.read_csv(performance_file)
+    performance_df = pd.concat([existing_df, performance_df], ignore_index=True)
+except FileNotFoundError:
+    pass  # If file does not exist, it will be created
 
-# Function to evaluate model and save results
-def evaluate_and_save_model(model_name, y_true, y_pred, filename="../model_performance.csv"):
-    r2 = r2_score(y_true, y_pred)
-    mse = mean_squared_error(y_true, y_pred)
-    rmse = np.sqrt(mse)
-    mae = mean_absolute_error(y_true, y_pred)
-    
-    # Calculate Prediction Loss Percentage
-    total_loss = np.sum(np.abs(y_true - y_pred))
-    total_actual = np.sum(y_true)
-    loss_percentage = (total_loss / total_actual) * 100
-
-    # Store results in DataFrame
-    results = pd.DataFrame({
-        "Model": [model_name],
-        "R² Score": [r2],
-        "RMSE": [rmse],
-        "MSE": [mse],
-        "MAE": [mae],
-        "Prediction Loss %": [loss_percentage]
-    })
-
-    # Append or create file
-    try:
-        existing_results = pd.read_csv(filename)
-        results = pd.concat([existing_results, results], ignore_index=True)
-    except FileNotFoundError:
-        pass  # First time writing file
-
-    results.to_csv(filename, index=False)
-    print(f"Results for {model_name} saved to {filename}")
-
-    evaluate_and_save_model("Voting Regressor", y_test, y_pred)
-
-
+performance_df.to_csv(performance_file, index=False)
+print("Model performance metrics appended to model_performance.csv")
