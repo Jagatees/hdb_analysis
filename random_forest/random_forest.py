@@ -75,3 +75,39 @@ print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
 # Save predictions for the 2024 data
 df_2024.to_csv("../csv_predicated_model/RandomForest.csv", index=False)
 print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest.csv")
+
+
+# Function to evaluate model and save results
+def evaluate_and_save_model(model_name, y_true, y_pred, filename="../model_performance.csv"):
+    r2 = r2_score(y_true, y_pred)
+    mse = mean_squared_error(y_true, y_pred)
+    rmse = np.sqrt(mse)
+    mae = mean_absolute_error(y_true, y_pred)
+    
+    # Calculate Prediction Loss Percentage
+    total_loss = np.sum(np.abs(y_true - y_pred))
+    total_actual = np.sum(y_true)
+    loss_percentage = (total_loss / total_actual) * 100
+
+    # Store results in DataFrame
+    results = pd.DataFrame({
+        "Model": [model_name],
+        "R² Score": [r2],
+        "RMSE": [rmse],
+        "MSE": [mse],
+        "MAE": [mae],
+        "Prediction Loss %": [loss_percentage]
+    })
+
+    # Append or create file
+    try:
+        existing_results = pd.read_csv(filename)
+        results = pd.concat([existing_results, results], ignore_index=True)
+    except FileNotFoundError:
+        pass  # First time writing file
+
+    results.to_csv(filename, index=False)
+    print(f"Results for {model_name} saved to {filename}")
+
+# Example usage in your model script
+evaluate_and_save_model("RandomForest", y_test, y_pred)

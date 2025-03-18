@@ -9,6 +9,42 @@ from sklearn.linear_model import Ridge
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
+
+
+# Function to evaluate model and save results
+def evaluate_and_save_model(model_name, y_true, y_pred, filename="../model_performance.csv"):
+    r2 = r2_score(y_true, y_pred)
+    mse = mean_squared_error(y_true, y_pred)
+    rmse = np.sqrt(mse)
+    mae = mean_absolute_error(y_true, y_pred)
+    
+    # Calculate Prediction Loss Percentage
+    total_loss = np.sum(np.abs(y_true - y_pred))
+    total_actual = np.sum(y_true)
+    loss_percentage = (total_loss / total_actual) * 100
+
+    # Store results in DataFrame
+    results = pd.DataFrame({
+        "Model": [model_name],
+        "R² Score": [r2],
+        "RMSE": [rmse],
+        "MSE": [mse],
+        "MAE": [mae],
+        "Prediction Loss %": [loss_percentage]
+    })
+
+    # Append or create file
+    try:
+        existing_results = pd.read_csv(filename)
+        results = pd.concat([existing_results, results], ignore_index=True)
+    except FileNotFoundError:
+        pass  # First time writing file
+
+    results.to_csv(filename, index=False)
+    print(f"Results for {model_name} saved to {filename}")
+
+
+
 def evaluate_model(y_true, y_pred):
     """
     Evaluate the performance of a regression model and print key metrics.
@@ -143,5 +179,11 @@ def main():
     df_2024.to_csv(output_path, index=False)
     print(f"Predicted resale prices for 2024 saved to {output_path}")
 
+    evaluate_and_save_model("Stacking Regressor", y_test, y_pred)
+
+
 if __name__ == '__main__':
     main()
+
+
+

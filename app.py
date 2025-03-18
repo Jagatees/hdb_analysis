@@ -2,16 +2,17 @@ import streamlit as st
 import pandas as pd
 import folium
 import os
+import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
 
 # Page Title
-st.title("HDB Resale Price Prediction with Map Visualization")
+st.title("HDB Resale Price Prediction & Analysis")
 
 # Sidebar for Navigation
 st.sidebar.header("Navigation")
 options = st.sidebar.radio(
     "Select Page",
-    ["Home", "Map Visualization"]
+    ["Home", "Map Visualization", "Model Comparison"]
 )
 
 # Folder where CSVs are stored
@@ -22,7 +23,7 @@ csv_folder = "csv_predicated_model"
 # ------------------
 if options == "Home":
     st.subheader("Welcome to the HDB Resale Price Prediction Tool")
-    st.write("This tool allows you to visualize 2024 HDB resale prices and predicted prices on a map.")
+    st.write("This tool allows you to visualize 2024 HDB resale prices and predicted prices on a map, as well as compare different machine learning models used for prediction.")
 
 # ------------------
 # MAP VISUALIZATION PAGE
@@ -78,3 +79,74 @@ elif options == "Map Visualization":
 
     # 8. Display the map in Streamlit
     st_folium(folium_map, width=700, height=500)
+
+# ------------------
+# MODEL COMPARISON PAGE
+# ------------------
+elif options == "Model Comparison":
+    st.subheader("Model Comparison")
+
+    # Path to the model performance CSV
+    performance_csv = "model_performance.csv"
+
+    # Check if the file exists
+    if not os.path.exists(performance_csv):
+        st.error("Model performance file not found.")
+        st.stop()
+
+    # Load model performance data
+    df_performance = pd.read_csv(performance_csv)
+
+    # Show raw performance data
+    st.write("Performance metrics of different models:")
+    st.dataframe(df_performance)
+
+    # Explanation of the metrics
+    st.write("### 📖 Understanding the Metrics")
+    
+    st.markdown("""
+    - **🔵 R² Score (Coefficient of Determination)**: Measures how well the model explains the variance in resale prices.  
+      - **Closer to 1** means a better model fit.
+    - **🔴 RMSE (Root Mean Squared Error)**: Measures the average difference between predicted and actual prices.  
+      - **Lower values are better**.
+    - **🟢 MSE (Mean Squared Error)**: Similar to RMSE but squared, penalizing large errors more.  
+      - **Lower values are better**.
+    - **🟠 MAE (Mean Absolute Error)**: Measures the average absolute error between actual and predicted prices.  
+      - **Lower values are better**.
+    - **🟣 Prediction Loss %**: Compares total absolute error to actual resale prices, showing **overall model accuracy**.  
+      - **Lower values are better**.
+    """)
+
+    # Plot Model Performance Comparison
+    st.write("### 📊 Model Performance Comparison")
+
+    # Select metrics to visualize
+    metric_options = ["R² Score", "RMSE", "MSE", "MAE", "Prediction Loss %"]
+    selected_metric = st.selectbox("Select a metric to compare:", metric_options)
+
+    # Plot selected metric as a bar chart with improved layout
+    fig, ax = plt.subplots(figsize=(12, 6))
+    df_performance.plot(x="Model", y=selected_metric, kind="bar", ax=ax, color='skyblue', legend=False)
+
+    plt.title(f"{selected_metric} Comparison Across Models", fontsize=14, fontweight='bold')
+    plt.ylabel(selected_metric, fontsize=12)
+    plt.xlabel("Model", fontsize=12)
+    plt.xticks(rotation=30, ha="right", fontsize=10)  # Rotate and align x-axis labels properly
+    plt.grid(axis="y", linestyle="--", alpha=0.7)
+    plt.tight_layout()
+
+    # Save the chart as an image
+    chart_path = "model_performance_chart.png"
+    plt.savefig(chart_path, format="png")
+
+    # Show the chart in Streamlit
+    st.pyplot(fig)
+
+    # Provide a download button for the chart
+    with open(chart_path, "rb") as file:
+        st.download_button(
+            label="📥 Download Chart",
+            data=file,
+            file_name="model_performance_chart.png",
+            mime="image/png"
+        )
