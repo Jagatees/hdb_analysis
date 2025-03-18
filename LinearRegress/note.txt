@@ -1,3 +1,0 @@
-Linear Regression - R²: 0.9760, RMSE: 25814.56, MSE: 666391484.74, MAE: 17488.43
-Overall Prediction Loss Percentage: 4.31%
-Predicted resale prices for 2024 saved to LinearRegress.csv

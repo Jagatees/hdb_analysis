@@ -1,5 +1,0 @@
-Decision Tree - R²: 0.9963, RMSE: 10247.21, MSE: 105005269.54, MAE: 3795.45 (Base)
-Overall Prediction Loss Percentage: 1.23%
-
-Decision Tree - R²: 0.9966, RMSE: 9787.30, MSE: 95791256.09, MAE: 3706.24 (Hypertune)
-Overall Prediction Loss Percentage: 1.20%

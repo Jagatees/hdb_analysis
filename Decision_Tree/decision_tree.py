@@ -75,8 +75,8 @@ loss_percentage = (total_loss / total_actual) * 100
 print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
 
 # Save predictions for 2024 data
-df_2024.to_csv("../csv_predicated_model/sampled_hdb_2024_predictions_DecisionTree.csv", index=False)
-print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_DecisionTree.csv")
+df_2024.to_csv("../csv_predicated_model/DecisionTree.csv", index=False)
+print("Predicted resale prices for 2024 saved to DecisionTree.csv")
 
 
 # Function to evaluate model and save results

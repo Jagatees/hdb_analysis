@@ -93,7 +93,7 @@ print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
 
 # Save predictions for the 2024 data
 df_2024.to_csv("../csv_predicated_model/RandomForest_GridSearch.csv", index=False)
-print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_RandomForest_GridSearch.csv")
+print("Predicted resale prices for 2024 saved to RandomForest_GridSearch.csv")
 
 
 # Function to evaluate model and save results
