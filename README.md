@@ -118,18 +118,18 @@ To ensure a robust and realistic model evaluation, we use a **time-based train-t
 Unlike random train-test splits, our **time-based approach** prevents **data leakage from future transactions**, making the prediction process more realistic.
 ## 🏆 Best Model Performance
 
-We evaluated multiple models, and here are the top three based on performance metrics:
+We evaluated multiple models, and here are the top 11 ranked accordingly by loss percentage:
 
 | Rank | Model                                 | R² Score | RMSE       | MSE               | MAE        | Loss Percentage % |
-|------|---------------------------------------|----------|------------|-------------------|------------|-------------------|
-| 1️⃣  | **Stacking Regressor (XG + XGBoost)** | 0.9472   | 38250.11   | 1,463,070,655.89  | 27,024.72  | 8.06              |
-| 2️⃣  | **XGBoost with GridSearch** (Best)    | 0.9498   | 37297.22   | 1,391,082,733.51  | 26,133.19  | 8.20              |
-| 3️⃣  | **XGBoost (Standard)**                | 0.9460   | 38710.85   | 1,498,530,194.50  | 27,413.72  | 8.39              |
-| 4️⃣  | **VotingRegresso**                    | 0.9420   | 40094.02   | 1,607,530,584.93  | 27,576.23  | 8.53              |
-| 5️⃣  | **RandomForestRegressor (Base)**      | 0.9290   | 44355.55   | 1,967,414,894.78  | 29,697.01  | 9.09              |
-| 6️⃣  | **Linear Regression**                 | 0.8626   | 61724.76   | 3,809,946,402.46  | 48,092.03  | 9.76              |
-| 7️⃣  | **Decision Tree with GridSearch**     | 0.8810   | 57435.65   | 3,298,853,944.70  | 38,937.18  | 10.17             |
-| 8️⃣  | **RandomForest with GridSearch**      | 0.9312   | 43671.19   | 1,907,172,613.87  | 29,655.97  | 10.32             |
-| 9️⃣  | **Decision Tree**                     | 0.8701   | 60009.04   | 3,601,085,294.17  | 40,872.11  | 10.39             |
-| 🔟  | **KNeighborsRegressor (Base)**        | 0.8831   | 56945.11   | 3,242,746,014.74  | 38,346.69  | 10.62             |
-| 1️⃣1️⃣  | **KNN with GridSearch**               | 0.9058   | 51121.55   | 2,613,413,116.25  | 34,805.14  | 11.44             |
+|---|---------------------------------------|----------|------------|-------------------|------------|-------------------|
+| 1️ | **Stacking Regressor (XG + XGBoost)** | 0.9472   | 38250.11   | 1,463,070,655.89  | 27,024.72  | 8.06              |
+| 2️ | **XGBoost with GridSearch** (Best)    | 0.9498   | 37297.22   | 1,391,082,733.51  | 26,133.19  | 8.20              |
+| 3️ | **XGBoost (Standard)**                | 0.9460   | 38710.85   | 1,498,530,194.50  | 27,413.72  | 8.39              |
+| 4️ | **Voting Regressor**                  | 0.9420   | 40094.02   | 1,607,530,584.93  | 27,576.23  | 8.53              |
+| 5 | **RandomForestRegressor (Base)**      | 0.9290   | 44355.55   | 1,967,414,894.78  | 29,697.01  | 9.09              |
+| 6️ | **Linear Regression**                 | 0.8626   | 61724.76   | 3,809,946,402.46  | 48,092.03  | 9.76              |
+| 7️ | **Decision Tree with GridSearch**     | 0.8810   | 57435.65   | 3,298,853,944.70  | 38,937.18  | 10.17             |
+| 8 | **RandomForest with GridSearch**      | 0.9312   | 43671.19   | 1,907,172,613.87  | 29,655.97  | 10.32             |
+| 9️ | **Decision Tree**                     | 0.8701   | 60009.04   | 3,601,085,294.17  | 40,872.11  | 10.39             |
+| 10 | **KNeighborsRegressor (Base)**        | 0.8831   | 56945.11   | 3,242,746,014.74  | 38,346.69  | 10.62             |
+| 11 | **KNN with GridSearch**               | 0.9058   | 51121.55   | 2,613,413,116.25  | 34,805.14  | 11.44             |
