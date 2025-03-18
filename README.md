@@ -1,28 +1,33 @@
-# HDB Resale Price Prediction
+# 🏠 HDB Resale Price Prediction
 
-This project uses a machine learning model to predict HDB resale prices. The interactive application, built with Streamlit, allows users to select parameters from a dropdown menu to view model predictions in real time.
+This project leverages **machine learning** to predict HDB resale prices. Built with **Streamlit**, it provides an interactive interface where users can input parameters through a dropdown menu and receive real-time price predictions.
+## 🚀 Features
 
-## Features
+- **🔹 Interactive UI:** A user-friendly interface powered by **Streamlit**.
+- **📊 Real-Time Predictions:** Instant resale price predictions based on user-selected features.
+- **📂 Data-Driven Model:** Trained on historical HDB resale transaction data.
+- **⚡ Optimized Performance:** Hyperparameter tuning to improve prediction accuracy.
+## 🛠 Requirements
 
-- **Interactive UI:** Uses Streamlit to create an easy-to-use interface.
-- **Dropdown Selection:** Choose from various house features to see predicted prices.
-- **Real-Time Predictions:** Quickly display model outputs based on your selections.
+- Python **3.x**
+- Required dependencies listed in **`requirements.txt`**
+    
+## Deployment
 
-## Requirements
+To run Project
 
-- Python 3.x
-- All required libraries listed in the `requirements.txt` file
-
-## Installation
-
-1. **Clone the Repository:**
-
-   ```bash
-   git clone <repository_url>
-   cd <project_directory>
-   pip install -r requirements.txt
+```bash
+cd <project_directory>
+pip install -r requirements.txt
 python3 app.py
+```
 
+## 🏆 Best Model Performance
 
-Model Overview
-This project leverages a predictive model to estimate HDB resale prices based on various input parameters. For details on model training, evaluation, and data preprocessing, please refer to the code comments and documentation within the project files.
+We evaluated multiple models, and here are the top three based on performance metrics:
+
+| Model                               | R² Score | RMSE (SGD) | MSE (SGD²) | MAE (SGD) | Prediction Loss % |
+|--------------------------------------|---------|------------|------------|------------|------------------|
+| **XGBoost with GridSearch** (Best)   | **0.9498** | **37,297.22** | **1,391,082,733.51** | **26,133.19** | **8.20%** |
+| **Stacking Regressor (XG + XGBoost)** | 0.9472 | 38,250.11 | 1,463,070,655.89 | 27,024.72 | 8.06% |
+| **XGBoost (Standard)**               | 0.9460 | 38,710.85 | 1,498,530,194.50 | 27,413.72 | 8.39% |
