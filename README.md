@@ -1,17 +1,19 @@
-🏠 HDB Resale Price Prediction
+# 🏠 HDB Resale Price Prediction
 This project leverages machine learning to predict HDB resale prices in Singapore. Built with Streamlit, it provides an interactive interface where users can input various parameters through a dropdown menu and receive real-time price predictions.
 
-📌 Introduction
+# 📌 Introduction
 This report outlines the development of a regression model designed to predict fair resale prices for public housing flats in Singapore. The model is trained using historical HDB resale transaction data from 2017 to 2023, allowing it to predict 2024 resale prices.
 
 Since we already have actual resale prices for 2024, we can evaluate our model's accuracy by comparing predicted prices against the real 2024 transactions. This enables us to assess how well different models perform in forecasting resale values and identify the most reliable approach for future predictions.
 
 By integrating machine learning techniques, this project aims to assist homeowners, buyers, and policymakers in making data-driven decisions regarding HDB resale transactions.
 
-
 ## Dataset
 
-HDB resale price prediction: https://data.gov.sg/dataset/resale-flat-prices## 🚀 Features
+HDB resale price prediction: https://data.gov.sg/dataset/resale-flat-prices
+
+
+## 🚀 Features
 
 - **🔹 Interactive UI:** A user-friendly interface powered by **Streamlit**.
 - **📂 Data-Driven Model:** Trained on historical HDB resale transaction data.
