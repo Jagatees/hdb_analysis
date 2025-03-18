@@ -139,7 +139,7 @@ def main():
     print(f"\nStacking Regressor Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
     
     # Save predictions to CSV
-    output_path = "./sampled_hdb_2024_predictions_StackingRegressor.csv"
+    output_path = "../csv_predicated_model/stacking_regressor.csv"
     df_2024.to_csv(output_path, index=False)
     print(f"Predicted resale prices for 2024 saved to {output_path}")
 
