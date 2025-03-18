@@ -95,38 +95,20 @@ print(f"Overall Prediction Loss Percentage: {loss_percentage:.2f}%")
 df_2024.to_csv("../csv_predicated_model/RandomForest_GridSearch.csv", index=False)
 print("Predicted resale prices for 2024 saved to RandomForest_GridSearch.csv")
 
+# Save model performance metrics to a CSV file
+performance_data = {
+    "Metric": ["Model","R²", "RMSE", "MSE", "MAE", "Loss Percentage"],
+    "Value": ["RandomForest_GridSearch",r2, rmse, mse, mae, loss_percentage]
+}
+performance_df = pd.DataFrame(performance_data)
 
-# Function to evaluate model and save results
-def evaluate_and_save_model(model_name, y_true, y_pred, filename="../model_performance.csv"):
-    r2 = r2_score(y_true, y_pred)
-    mse = mean_squared_error(y_true, y_pred)
-    rmse = np.sqrt(mse)
-    mae = mean_absolute_error(y_true, y_pred)
-    
-    # Calculate Prediction Loss Percentage
-    total_loss = np.sum(np.abs(y_true - y_pred))
-    total_actual = np.sum(y_true)
-    loss_percentage = (total_loss / total_actual) * 100
+# Append performance metrics to existing file if it exists
+performance_file = "../model_performance.csv"
+try:
+    existing_df = pd.read_csv(performance_file)
+    performance_df = pd.concat([existing_df, performance_df], ignore_index=True)
+except FileNotFoundError:
+    pass  # If file does not exist, it will be created
 
-    # Store results in DataFrame
-    results = pd.DataFrame({
-        "Model": [model_name],
-        "R² Score": [r2],
-        "RMSE": [rmse],
-        "MSE": [mse],
-        "MAE": [mae],
-        "Prediction Loss %": [loss_percentage]
-    })
-
-    # Append or create file
-    try:
-        existing_results = pd.read_csv(filename)
-        results = pd.concat([existing_results, results], ignore_index=True)
-    except FileNotFoundError:
-        pass  # First time writing file
-
-    results.to_csv(filename, index=False)
-    print(f"Results for {model_name} saved to {filename}")
-
-# Example usage in your model script
-evaluate_and_save_model("RandomForest_GridSearch", y_test, y_pred)
+performance_df.to_csv(performance_file, index=False)
+print("Model performance metrics appended to model_performance.csv")

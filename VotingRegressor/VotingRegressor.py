@@ -91,7 +91,7 @@ print(f"Voting Regressor Overall Prediction Loss Percentage: {loss_percentage:.2
 
 # Save predictions for the 2024 data
 df_2024.to_csv("../csv_predicated_model/votiing-regresser.csv", index=False)
-print("Predicted resale prices for 2024 saved to VotingRegressor.csv")
+print("Predicted resale prices for 2024 saved to sampled_hdb_2024_predictions_VotingRegressor.csv")
 
 
 
