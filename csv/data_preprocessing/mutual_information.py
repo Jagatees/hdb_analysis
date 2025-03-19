@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.feature_selection import mutual_info_regression
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
 
 file_path_2017_2023 = "../2017 - 2023.csv"
 df = pd.read_csv(file_path_2017_2023)
@@ -30,6 +31,12 @@ target = 'resale_price'
 
 # Prepare independent (X) and dependent (y) variables
 X = df[features + categorical_features]
+
+# Apply Standardisation (Z-score scaling) to numerical features
+scaler = StandardScaler()
+X[features] = scaler.fit_transform(X[features]) 
+
+# Define target variable
 y = df[target]
 
 # One-hot encode categorical features for MI calculation

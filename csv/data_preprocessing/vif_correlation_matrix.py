@@ -3,6 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from statsmodels.stats.outliers_influence import variance_inflation_factor
+from sklearn.preprocessing import StandardScaler
 
 # Load dataset
 df = pd.read_csv("../2017 - 2023.csv")  # Update with the correct path
@@ -10,7 +11,9 @@ df = df.drop(columns=["price_per_square_meter", "block", "street_name", "latitud
 
 # Select only numerical features for correlation analysis
 numerical_df = df.select_dtypes(include=[np.number])
-no_target_df = numerical_df.drop(columns=["resale_price"], errors="ignore")
+scaler = StandardScaler()
+numerical_df_scaled = pd.DataFrame(scaler.fit_transform(numerical_df), columns=numerical_df.columns)
+no_target_df = numerical_df_scaled.drop(columns=["resale_price"], errors="ignore")
 
 # Compute Variance Inflation Factor (VIF)
 vif_data = pd.DataFrame()
@@ -22,8 +25,8 @@ vif_csv_path = "vif_results.csv"
 vif_data.to_csv(vif_csv_path, index=False)
 
 # Compute correlation matrices
-corr_matrix = numerical_df.corr()
-spearman_corr_matrix = numerical_df.corr(method='spearman')
+corr_matrix = numerical_df_scaled.corr()
+spearman_corr_matrix = numerical_df_scaled.corr(method='spearman')
 
 # Plot and save Pearson correlation heatmap
 plt.figure(figsize=(16, 12))
