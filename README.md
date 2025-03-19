@@ -123,7 +123,7 @@ We evaluated multiple models, and here are the top 11 ranked accordingly by loss
 | Rank | Model                                 | R² Score | RMSE       | MSE               | MAE        | Loss Percentage % |
 |---|---------------------------------------|----------|------------|-------------------|------------|-------------------|
 | 1️ | **Stacking Regressor (XG + XGBoost)** | 0.9472   | 38250.11   | 1,463,070,655.89  | 27,024.72  | 8.06              |
-| 2️ | **XGBoost with GridSearch** (Best)    | 0.9498   | 37297.22   | 1,391,082,733.51  | 26,133.19  | 8.20              |
+| 2️ | **XGBoost with GridSearch**     | 0.9498   | 37297.22   | 1,391,082,733.51  | 26,133.19  | 8.20              |
 | 3️ | **XGBoost (Standard)**                | 0.9460   | 38710.85   | 1,498,530,194.50  | 27,413.72  | 8.39              |
 | 4️ | **Voting Regressor**                  | 0.9420   | 40094.02   | 1,607,530,584.93  | 27,576.23  | 8.53              |
 | 5 | **RandomForestRegressor (Base)**      | 0.9290   | 44355.55   | 1,967,414,894.78  | 29,697.01  | 9.09              |
