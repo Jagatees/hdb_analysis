@@ -13,7 +13,8 @@ By integrating machine learning techniques, this project aims to assist homeowne
 ### HDB resale price prediction:
 - https://data.gov.sg/dataset/resale-flat-prices
 
-### Coordinates of Amenities:  
+### Coordinates of Amenities:
+
 Shopping Mall:  
 - https://www.kaggle.com/datasets/karthikgangula/shopping-mall-coordinates?resource=download  
 School:  
@@ -21,10 +22,10 @@ School:
 Bus Stop:  
 - https://www.kaggle.com/datasets/gowthamvarma/singapore-bus-data-land-transport-authority/data  
 MRT Station:  
-- https://www.kaggle.com/datasets/shengjunlim/singapore-mrt-lrt-stations-with-coordinates?resource=download 
-- https://www.kaggle.com/datasets/yxlee245/singapore-train-station-coordinates
+- https://www.kaggle.com/datasets/shengjunlim/singapore-mrt-lrt-stations-with-coordinates?resource=download
+- https://www.kaggle.com/datasets/yxlee245/singapore-train-station-coordinates  
 Polyclinics:  
-- https://www.arcgis.com/home/item.html?id=f3c1113a2c554716a2a1a0d3632dd9ed&sublayer=0#data
+- https://www.arcgis.com/home/item.html?id=f3c1113a2c554716a2a1a0d3632dd9ed&sublayer=0#data  
 Hospital:  
 - https://www.pacificprime.sg/resources/singapore-hospital-list/  
 
