@@ -13,20 +13,20 @@ By integrating machine learning techniques, this project aims to assist homeowne
 ### HDB resale price prediction:
 - https://data.gov.sg/dataset/resale-flat-prices
 
-### Coordinates of Amenities:
-Shopping Mall: 
+### Coordinates of Amenities:  
+Shopping Mall:  
 - https://www.kaggle.com/datasets/karthikgangula/shopping-mall-coordinates?resource=download  
-School: 
+School:  
 - https://data.gov.sg/datasets/d_688b934f82c1059ed0a6993d2a829089/view  
-Bus Stop: 
+Bus Stop:  
 - https://www.kaggle.com/datasets/gowthamvarma/singapore-bus-data-land-transport-authority/data  
-MRT Station: 
+MRT Station:  
 - https://www.kaggle.com/datasets/shengjunlim/singapore-mrt-lrt-stations-with-coordinates?resource=download 
 - https://www.kaggle.com/datasets/yxlee245/singapore-train-station-coordinates
-Polyclinics: 
+Polyclinics:  
 - https://www.arcgis.com/home/item.html?id=f3c1113a2c554716a2a1a0d3632dd9ed&sublayer=0#data
-Hospital:
-- 
+Hospital:  
+- https://www.pacificprime.sg/resources/singapore-hospital-list/  
 
 ## 🚀 Features
 
@@ -76,7 +76,7 @@ These categorical variables provide **contextual information** about the flats:
 ### **Data Information**
 Numerical features 1-5 and Categorical Features 1-4 were derived from the dataset found in [HDB resale price prediction](https://data.gov.sg/dataset/resale-flat-prices)  
 
-Numerical features 6 (Score) is devired from adding weights to each of the amenities listed in the dataset as well as Floor Area and Lease Remaing to generate a score for each of the HDB listed in the [dataset](https://data.gov.sg/dataset/resale-flat-prices)
+Numerical features 6 (Score) is derived from adding weights to each of the amenities listed in the dataset to generate a score for each of the HDB listed in the [dataset](https://data.gov.sg/dataset/resale-flat-prices)  
 
 ---
 
@@ -118,7 +118,7 @@ To ensure a robust and realistic model evaluation, we use a **time-based train-t
 Unlike random train-test splits, our **time-based approach** prevents **data leakage from future transactions**, making the prediction process more realistic.
 ## 🏆 Best Model Performance
 
-We evaluated multiple models, and here are the top 11 ranked accordingly by loss percentage:
+We evaluated multiple models, and here are the 11 models ranked accordingly by loss percentage:
 
 | Rank | Model                                 | R² Score | RMSE       | MSE               | MAE        | Loss Percentage % |
 |---|---------------------------------------|----------|------------|-------------------|------------|-------------------|
